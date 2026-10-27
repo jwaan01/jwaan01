@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="./assets/hero.svg" alt="JWAAN01 — Freelance Full-Stack Developer" width="100%" />
+  <a href="https://jwaan01.github.io/jwaan01/"><img src="./assets/hero.svg" alt="JWAAN01 — Freelance Full-Stack Developer" width="100%" /></a>
+</p>
+
+<p align="center">
+  <a href="https://jwaan01.github.io/jwaan01/"><img src="https://img.shields.io/badge/%E2%96%B6%20PRESS%20START-Interactive%20manga%20portfolio-e3203b?style=for-the-badge&labelColor=0f0f14" alt="Press start: open the interactive manga portfolio" /></a>
 </p>
 
 <p align="center">

@@ -1,0 +1,554 @@
+<title>JWAAN01 Night Manga</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Quan Huynh (jwaan01) — freelance full-stack developer. React, Node.js, Python, Docker.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,700;0,800;1,800;1,900&family=Be+Vietnam+Pro:wght@400;600&family=Dela+Gothic+One&display=swap">
+<style>
+/* Layout: a Vết Đỏ night page; Hỏa Tuyến paper komas cut on the diagonal float on it, one red slab per chapter. */
+:root {
+  --ink: #0b0b0d;      /* night ground (Vết Đỏ) */
+  --ink-2: #1d1d22;    /* second dark surface */
+  --ink-3: #2a2a30;
+  --line: #0f0f14;     /* manga ink on paper (Hỏa Tuyến) */
+  --paper: #fbf8f1;
+  --paper-2: #efeadf;
+  --red: #e3203b;      /* primary */
+  --red-deep: #b3121f;
+  --volt: #ffd60a;     /* SFX, combo */
+  --cyan: #00d2e0;     /* signal, <5% */
+  --white: #ffffff;
+  --mute: #b9b9c2;
+  --ink-muted: #5a5a66;
+  --f-sfx: "Dela Gothic One", "Arial Black", sans-serif;
+  --f-disp: "Anton", Impact, sans-serif;
+  --f-head: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Be Vietnam Pro", system-ui, sans-serif;
+  --gutter: 10px;
+  --stroke: 5px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html { scroll-behavior: smooth; scroll-padding-top: 80px }
+body {
+  background: var(--ink); color: var(--white); font: 400 17px/1.55 var(--f-body);
+  overflow-x: hidden;
+  background-image: radial-gradient(circle, rgba(227, 32, 59, .16) 2.4px, transparent 2.6px);
+  background-size: 14px 14px; background-attachment: fixed;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink) }
+a { color: inherit }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+
+/* ---------- type helpers ---------- */
+.lb { font: 800 15px/1.2 var(--f-head); letter-spacing: 2px; text-transform: uppercase }
+.hd { font: italic 900 1em/1 var(--f-head); text-transform: uppercase; letter-spacing: .5px }
+.sfx { font-family: var(--f-sfx); line-height: .95; letter-spacing: .05em; paint-order: stroke fill; -webkit-text-stroke: .1em var(--line); display: inline-block; transform: skewX(-8deg); white-space: nowrap }
+.sfx-out { filter: drop-shadow(0 0 0 var(--white)) }
+.chapter { display: inline-block; background: var(--line); color: var(--volt); padding: 6px 18px 5px; clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%) }
+
+/* ---------- koma: ink layer + fill sharing one cut, hard shadow ---------- */
+.k { position: relative; --cut: polygon(2% 0, 100% 0, 98% 100%, 0 100%); --fill: var(--paper); --sh: var(--red);
+  filter: drop-shadow(7px 7px 0 var(--sh)); transition: transform .12s ease, filter .12s ease }
+.k > .k-ink { position: absolute; inset: 0; background: var(--line); clip-path: var(--cut) }
+.k > .k-fill { position: absolute; inset: var(--stroke); background: var(--fill); clip-path: var(--cut); overflow: hidden }
+.k > .k-body { position: relative; z-index: 2; height: 100% }
+.speed { position: absolute; inset: 0; opacity: 0; transition: opacity .12s; pointer-events: none;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 9px, var(--line) 9px 10.5px, transparent 10.5px 23px),
+    repeating-linear-gradient(180deg, transparent 0 31px, var(--line) 31px 34px, transparent 34px 47px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%, #000 70%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 45%, #000 70%, transparent) }
+.speed.w { background:
+    repeating-linear-gradient(180deg, transparent 0 9px, var(--white) 9px 10.5px, transparent 10.5px 23px),
+    repeating-linear-gradient(180deg, transparent 0 31px, var(--white) 31px 34px, transparent 34px 47px) }
+.tone { position: absolute; inset: 0; pointer-events: none; opacity: .3;
+  background-image: radial-gradient(circle, var(--line) 34%, transparent 37%); background-size: 7px 7px;
+  -webkit-mask-image: linear-gradient(0deg, #000, transparent 70%); mask-image: linear-gradient(0deg, #000, transparent 70%) }
+.focus { position: absolute; inset: -60%; pointer-events: none;
+  background:
+    repeating-conic-gradient(from 3deg at 50% 50%, var(--white) 0 .55deg, transparent .55deg 3.1deg),
+    repeating-conic-gradient(from 0deg at 50% 50%, var(--white) 0 1.1deg, transparent 1.1deg 7.3deg);
+  -webkit-mask-image: radial-gradient(circle at center, transparent 18%, #000 55%);
+  mask-image: radial-gradient(circle at center, transparent 18%, #000 55%);
+  opacity: .45; animation: spin 60s linear infinite }
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* ---------- nav ---------- */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(11, 11, 13, .92); border-bottom: 3px solid var(--white) }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 10px }
+.logo { font: 400 26px/1 var(--f-disp); color: var(--line); background: var(--white); padding: 4px 14px 5px; text-decoration: none;
+  transform: rotate(-4deg); box-shadow: 6px 6px 0 var(--red); transition: transform .12s, box-shadow .12s }
+.logo:hover { transform: rotate(-4deg) translate(-2px, -2px); box-shadow: 9px 9px 0 var(--red) }
+.nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; justify-content: flex-end }
+.nav a.tab { position: relative; display: block; padding: 8px 14px; font: italic 900 19px/1 var(--f-head); text-transform: uppercase; letter-spacing: 1px; text-decoration: none; color: var(--mute); isolation: isolate }
+.nav a.tab::before { content: ""; position: absolute; inset: 0; background: var(--red); z-index: -1; transform: skewX(-20deg) scaleX(0); transform-origin: left; transition: transform .16s cubic-bezier(.7, 0, .2, 1) }
+.nav a.tab:hover, .nav a.tab:focus-visible, .nav a.tab.on { color: var(--white) }
+.nav a.tab:hover::before, .nav a.tab:focus-visible::before, .nav a.tab.on::before { transform: skewX(-20deg) scaleX(1) }
+
+/* ---------- buttons (DS: hover lifts -3px, shadow pushes out, speed lines; press stamps +5px) ---------- */
+.btn { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px 13px; border: 0; cursor: pointer; text-decoration: none;
+  font: italic 900 24px/1 var(--f-head); text-transform: uppercase; letter-spacing: 1px; color: var(--white); background: var(--red);
+  clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%); transition: transform .08s }
+.btn-wrap { display: inline-block; filter: drop-shadow(6px 6px 0 var(--line)); transition: filter .08s, transform .08s }
+.btn-wrap.on-dark { filter: drop-shadow(6px 6px 0 var(--white)) }
+.btn .speed { opacity: 0 }
+.btn-wrap:hover { transform: translate(-3px, -3px); filter: drop-shadow(10px 10px 0 var(--line)) }
+.btn-wrap.on-dark:hover { filter: drop-shadow(10px 10px 0 var(--white)) }
+.btn-wrap:hover .speed { opacity: .5 }
+.btn-wrap:active { transform: translate(5px, 5px); filter: drop-shadow(1px 1px 0 var(--line)) }
+.btn.alt { background: var(--white); color: var(--line) }
+.btn svg { width: 22px; height: 22px; flex: none }
+
+/* ---------- hero ---------- */
+.hero { padding-block: 34px 18px }
+.hero-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--gutter); min-height: 440px }
+.hero-left { --cut: polygon(0 0, 100% 0, 92% 100%, 0 100%) }
+.hero-left .k-body { padding: 34px 70px 34px 34px; display: flex; flex-direction: column; gap: 18px; color: var(--line) }
+.hero-left .avail { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; background: var(--line); color: var(--volt); padding: 7px 18px 6px; clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%) }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--volt); animation: blink 1.2s steps(1) infinite }
+@keyframes blink { 50% { opacity: .2 } }
+.name { font-size: clamp(30px, calc((84cqi - 110px) / 7.1), 96px); color: var(--red); -webkit-text-stroke: 9px var(--line); cursor: default; transition: transform .1s }
+.name:hover { animation: glitch .32s steps(1) 2 }
+@keyframes glitch { 0% { transform: skewX(-8deg) translate(-4px, 1px); text-shadow: 6px 0 var(--cyan) } 33% { transform: skewX(-8deg) translate(4px, -2px); text-shadow: -6px 0 var(--volt) } 66% { transform: skewX(-8deg) translate(-2px, 0) } 100% { transform: skewX(-8deg) } }
+.role { font-size: clamp(24px, 3vw, 34px) }
+.cycle { position: relative; background: var(--white); border: 5px solid var(--line); box-shadow: 6px 6px 0 var(--line); padding: 10px 16px; min-height: 56px; font-weight: 600; font-size: 17px; transform: skewX(-6deg) }
+.cycle span { display: block; transform: skewX(6deg) }
+.hero-left .actions { display: flex; flex-wrap: wrap; gap: 18px; margin-top: auto }
+.hero-right { --cut: polygon(14% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--red); --sh: var(--white); overflow: visible; cursor: crosshair }
+.hero-right .k-fill .tone { opacity: .35 }
+.burst-wrap { position: absolute; left: 50%; top: 50%; width: min(300px, 70%); aspect-ratio: 1; transform: translate(-50%, -50%) translate(var(--mx, 0px), var(--my, 0px)); transition: transform .2s ease-out }
+.burst { width: 100%; height: 100%; display: grid; place-items: center; transition: transform .15s cubic-bezier(.2, 1.6, .4, 1) }
+.burst svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible }
+.burst b { position: relative; font: 400 clamp(48px, 6vw, 72px)/1 var(--f-sfx); color: var(--line) }
+.hero-right:hover .burst { transform: scale(1.08) rotate(-4deg); animation: jit .3s steps(1) infinite }
+@keyframes jit { 0% { translate: 0 0 } 25% { translate: 3px -2px } 50% { translate: -2px 2px } 75% { translate: -3px -1px } }
+.hero-right .sfx { position: absolute; color: var(--white); font-size: clamp(30px, 4vw, 44px); -webkit-text-stroke: 5px var(--line) }
+.hero-right .s1 { right: 22px; top: 18px; transform: skewX(-8deg) rotate(8deg) }
+.hero-right .s2 { left: 26%; bottom: 22px; color: var(--volt); font-size: clamp(22px, 3vw, 30px); transform: skewX(-8deg) rotate(-6deg) }
+.hero-right:hover .s1 { animation: jit .25s steps(1) infinite }
+
+/* ---------- section headers ---------- */
+.sec { padding-block: 48px 8px }
+.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px }
+.sec-head h2 { margin: 10px 0 0; font: italic 900 clamp(40px, 6vw, 64px)/.95 var(--f-head); text-transform: uppercase; position: relative; z-index: 0; text-wrap: balance }
+.sec-head h2::after { content: ""; position: absolute; left: -6px; right: -10px; bottom: 6px; height: .32em; background: var(--red); z-index: -1; transform: skewX(-20deg) }
+.sec-head p { margin: 0; color: var(--mute); max-width: 36ch }
+.next { display: flex; align-items: center; gap: 0; margin-block: 34px 0 }
+.next::before, .next::after { content: ""; flex: 1; height: 8px; background: var(--paper) }
+.next span { background: var(--volt); color: var(--line); padding: 5px 22px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%) }
+
+/* ---------- night run ---------- */
+.game { display: block; border: 5px solid var(--white); box-shadow: 9px 9px 0 var(--red); transition: transform .12s, box-shadow .12s; background: var(--ink) }
+.game img { display: block; width: 100%; height: auto }
+.game:hover { transform: translate(-3px, -3px); box-shadow: 13px 13px 0 var(--red) }
+.game-note { margin: 18px 0 0; color: var(--mute); font-size: 15px }
+
+/* ---------- about page (three komas) ---------- */
+.about { display: grid; grid-template-columns: 1fr 1.4fr; grid-template-rows: auto auto; gap: var(--gutter) }
+.pa { grid-row: span 2; --cut: polygon(0 0, 100% 0, 88% 100%, 0 100%); --fill: var(--red); --sh: var(--white) }
+.pa .k-body { padding: 30px 60px 34px 30px; display: flex; flex-direction: column; gap: 16px }
+.pa .who { align-self: flex-start; font-size: clamp(34px, calc((82cqi - 96px) / 5.6), 84px); line-height: 1.02 }
+.pa .who .a { color: var(--white) }
+.pa .who .b { color: var(--volt) }
+.pa .eng { align-self: flex-start; background: var(--line); color: var(--white); font: italic 900 22px/1 var(--f-head); text-transform: uppercase; padding: 10px 22px 9px; clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%) }
+.pb { --cut: polygon(3% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--white); filter: none }
+.pb .k-body { padding: 26px 26px 34px 40px }
+.bubble { position: relative; background: var(--white); border: 5px solid var(--line); border-radius: 50%; padding: 30px 46px; text-align: center; color: var(--line); filter: drop-shadow(6px 6px 0 var(--line)); transition: transform .15s cubic-bezier(.2, 1.6, .4, 1) }
+.bubble::after { content: ""; position: absolute; left: 12%; bottom: -24px; width: 44px; height: 34px; background: var(--white); border-left: 5px solid var(--line); border-bottom: 5px solid var(--line); transform: skewX(-38deg) rotate(-8deg) }
+.bubble:hover { transform: scale(1.03) rotate(-1deg) }
+.bubble .who { display: block; color: var(--red-deep); margin-bottom: 6px }
+.bubble p { margin: 0; font-weight: 600; font-size: 18px; line-height: 1.5 }
+.pc { --cut: polygon(1.5% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--ink-2); --sh: var(--red); filter: none }
+.pc .k-body { padding: 24px 26px 30px 32px }
+.pc h3 { margin: 0 0 16px; color: var(--volt) }
+.pc h3 small { color: var(--mute); font: 400 15px var(--f-body); letter-spacing: 0; text-transform: none; margin-left: 8px }
+.badges { display: flex; flex-wrap: wrap; gap: 10px }
+.badge { font: italic 900 22px/1 var(--f-head); text-transform: uppercase; padding: 10px 18px 9px; background: var(--paper); color: var(--line); border: 4px solid var(--line); box-shadow: 4px 4px 0 var(--red); transform: skewX(-9deg); cursor: default; transition: transform .14s cubic-bezier(.2, 1.6, .4, 1), background .1s, color .1s, box-shadow .1s }
+.badge:nth-child(odd) { background: var(--red); color: var(--white); box-shadow: 4px 4px 0 var(--white) }
+.badge:hover, .badge:focus-visible { transform: skewX(-9deg) translateY(-8px) rotate(-3deg) scale(1.06); background: var(--volt); color: var(--line); box-shadow: 7px 7px 0 var(--red) }
+
+/* ---------- arsenal slots + combo ---------- */
+.combo { display: flex; align-items: baseline; gap: 10px; min-height: 70px }
+.combo .n { font: 400 64px/1 var(--f-sfx); color: var(--volt); -webkit-text-stroke: 6px var(--line); paint-order: stroke fill; transform: skewX(-8deg) rotate(-5deg); display: inline-block; text-shadow: 0 0 0 transparent }
+.combo .n.bump { animation: bump .25s cubic-bezier(.2, 1.6, .4, 1) }
+@keyframes bump { from { transform: skewX(-8deg) rotate(-5deg) scale(1.6) } }
+.combo .h { font: 400 30px/1 var(--f-sfx); color: var(--red); -webkit-text-stroke: 4px var(--line); paint-order: stroke fill; transform: skewX(-8deg) rotate(-5deg); display: inline-block }
+.combo .full { font: 400 26px/1 var(--f-sfx); color: var(--volt); -webkit-text-stroke: 3px var(--line); paint-order: stroke fill; display: inline-block; transform: skewX(-8deg) rotate(-3deg) }
+.combo .full[hidden] { display: none }
+.combo .hint { color: var(--mute); font-size: 15px; align-self: center }
+.slots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px 12px }
+.slot { position: relative; height: 84px; display: grid; place-items: center; cursor: crosshair; outline: none; --cut: polygon(9% 0, 100% 0, 91% 100%, 0 100%); --fill: var(--ink-2); --sh: var(--ink-3) }
+.slot .k-body { display: grid; place-items: center; width: 100% }
+.slot b { font: italic 900 clamp(17px, 2vw, 23px)/1 var(--f-head); text-transform: uppercase; color: var(--white); letter-spacing: .5px; white-space: nowrap }
+.slot i { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%) skewX(-10deg); background: var(--volt); color: var(--line); border: 3px solid var(--line); font: 800 13px/1 var(--f-head); font-style: normal; padding: 3px 8px }
+.slot .k-ink { background: var(--white) }
+.slot:hover, .slot:focus-visible, .slot.hit { --fill: var(--red) }
+.slot:hover, .slot:focus-visible { transform: translate(-3px, -4px); filter: drop-shadow(8px 8px 0 var(--volt)) }
+.slot.hit:not(:hover) { filter: drop-shadow(5px 5px 0 var(--red-deep)) }
+.slot:hover .speed, .slot:focus-visible .speed { opacity: .35 }
+
+/* ---------- services ---------- */
+.svc { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px 18px }
+.svc .card { grid-column: span 2; --cut: polygon(4% 0, 100% 0, 96% 100%, 0 100%) }
+.svc .card.wide { grid-column: span 3; --cut: polygon(3% 0, 100% 0, 97% 100%, 0 100%) }
+.card .k-body { display: grid; grid-template-columns: 58px 1fr; gap: 16px; padding: 24px 30px 26px 30px; color: var(--line) }
+.card .ic { width: 58px; height: 54px; display: grid; place-items: center; background: var(--line); color: var(--white); clip-path: polygon(14% 0, 100% 0, 86% 100%, 0 100%); transition: background .12s }
+.card .ic svg { width: 30px; height: 30px }
+.card h3 { margin: 2px 0 8px; font: italic 900 25px/1 var(--f-head); text-transform: uppercase; text-wrap: balance }
+.card h3::after { content: ""; display: block; width: 56px; height: 5px; margin-top: 9px; background: var(--red); transform: skewX(-20deg); transform-origin: left; transition: width .2s cubic-bezier(.7, 0, .2, 1) }
+.card p { margin: 0; color: var(--ink-muted); font-size: 15.5px; line-height: 1.5 }
+.card:hover { transform: translate(-3px, -3px); filter: drop-shadow(11px 11px 0 var(--red)) }
+.card:hover .ic { background: var(--red) }
+.card:hover h3::after { width: 100% }
+.card:hover .speed { opacity: .18 }
+.card .speed { -webkit-mask-image: linear-gradient(90deg, transparent 55%, #000 80%, transparent); mask-image: linear-gradient(90deg, transparent 55%, #000 80%, transparent) }
+
+/* ---------- contact (title screen menu) ---------- */
+.contact { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--gutter) }
+.cl { --cut: polygon(0 0, 100% 0, 92% 100%, 0 100%) }
+.cl .k-body { padding: 30px 70px 34px 30px; color: var(--line) }
+.cl .big { font-size: clamp(24px, calc((86cqi - 104px) / 10.9), 64px); color: var(--red); -webkit-text-stroke: 6px var(--line); margin: 16px 0 4px }
+.cl .big2 { font-size: clamp(20px, calc((86cqi - 104px) / 12.5), 50px); color: var(--white); -webkit-text-stroke: 5px var(--line); margin-bottom: 18px }
+.menu { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px }
+.menu a, .menu .row { position: relative; display: grid; grid-template-columns: 26px 130px 1fr auto; align-items: center; gap: 6px; padding: 10px 18px; text-decoration: none; color: var(--line); isolation: isolate; min-width: 0 }
+.menu .row::before, .menu a::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--red); border: 4px solid var(--line); clip-path: polygon(2.5% 0, 100% 0, 97.5% 100%, 0 100%); transform: scaleX(0); transform-origin: left; transition: transform .14s cubic-bezier(.7, 0, .2, 1) }
+.menu .tri { width: 0; height: 0; border-left: 14px solid currentColor; border-top: 9px solid transparent; border-bottom: 9px solid transparent; opacity: 0; transition: opacity .1s }
+.menu .lbl { font: italic 900 28px/1 var(--f-head); text-transform: uppercase }
+.menu .val { color: var(--ink-muted); font-size: 16px; overflow-wrap: anywhere; min-width: 0 }
+.menu a:hover, .menu a:focus-visible, .menu .row:hover, .menu .row:focus-within { color: var(--white) }
+.menu a:hover::before, .menu a:focus-visible::before, .menu .row:hover::before, .menu .row:focus-within::before { transform: scaleX(1) }
+.menu a:hover .tri, .menu a:focus-visible .tri, .menu .row:hover .tri, .menu .row:focus-within .tri { opacity: 1 }
+.menu a:hover .val, .menu a:focus-visible .val, .menu .row:hover .val, .menu .row:focus-within .val { color: var(--white); font-weight: 600 }
+.copy { font: 800 13px/1 var(--f-head); letter-spacing: 1.5px; text-transform: uppercase; background: var(--line); color: var(--volt); border: 0; padding: 7px 10px; cursor: pointer; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%) }
+.cr { --cut: polygon(12% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--red); --sh: var(--white); min-height: 320px }
+.cr .burst-wrap { width: min(260px, 70%) }
+.cr:hover .burst { transform: scale(1.1) rotate(5deg); animation: jit .3s steps(1) infinite }
+
+/* ---------- footer ---------- */
+footer { padding-block: 52px 46px }
+.tbc { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap }
+.arrow { position: relative; display: inline-block; filter: drop-shadow(8px 8px 0 var(--white)); transition: transform .2s cubic-bezier(.2, 1.6, .4, 1) }
+.arrow span { display: block; background: var(--red); color: var(--white); font: italic 900 clamp(26px, 4vw, 40px)/1 var(--f-head); text-transform: uppercase; letter-spacing: 3px; padding: 20px 90px 20px 46px;
+  clip-path: polygon(0 18%, 82% 18%, 82% 0, 100% 50%, 82% 100%, 82% 82%, 0 82%, 5% 50%) }
+.arrow:hover { transform: translateX(14px) }
+.tbc small { color: var(--mute); font: 800 14px var(--f-head); letter-spacing: 2px; text-transform: uppercase }
+
+/* ---------- click SFX + scroll entrances ---------- */
+.pop { position: absolute; z-index: 30; pointer-events: none; font: 400 30px/1 var(--f-sfx); color: var(--volt); -webkit-text-stroke: 4px var(--line); paint-order: stroke fill; white-space: nowrap; animation: pop .6s cubic-bezier(.2, 1.6, .4, 1) forwards }
+@keyframes pop { 0% { transform: translate(-50%, -50%) scale(1.8) rotate(-8deg); opacity: 0 } 25% { transform: translate(-50%, -50%) scale(1) rotate(-6deg); opacity: 1 } 100% { transform: translate(-50%, -110%) scale(1) rotate(-6deg); opacity: 0 } }
+.rv.go { animation: slam .55s cubic-bezier(.7, 0, .2, 1) both }
+.rv.go.r { animation-name: slamR }
+@keyframes slam { from { transform: translateX(-60px); opacity: .1 } }
+@keyframes slamR { from { transform: translateX(60px); opacity: .1 } }
+
+/* ---------- responsive ---------- */
+.hero-left, .cl, .pa { container-type: inline-size }
+.hero-grid > *, .contact > *, .about > *, .svc > *, .slots > * { min-width: 0 }
+@media (max-width: 860px) {
+  .hero-grid, .contact { grid-template-columns: 1fr }
+  .hero-right, .cr { min-height: 300px }
+  .about { grid-template-columns: 1fr }
+  .pa { grid-row: auto }
+  .slots { grid-template-columns: repeat(4, 1fr) }
+  .svc { grid-template-columns: 1fr }
+  .svc .card, .svc .card.wide { grid-column: auto }
+  .nav ul { display: none }
+}
+@media (max-width: 520px) {
+  .slots { grid-template-columns: repeat(2, 1fr) }
+  .hero-left .k-body, .cl .k-body, .pa .k-body { padding: 26px 40px 28px 22px }
+  .menu a, .menu .row { grid-template-columns: 18px 1fr auto; padding: 10px 12px }
+  .menu .val { grid-column: 2 / -1; grid-row: 2 }
+  .menu .copy { grid-column: 3; grid-row: 1 }
+  .bubble { padding: 24px 26px }
+  .arrow span { padding: 16px 64px 16px 30px }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; scroll-behavior: auto !important }
+}
+</style>
+<!--/head-->
+
+<nav class="nav" aria-label="Chapters">
+  <div class="wrap">
+    <a class="logo" href="#top">JWAAN01</a>
+    <ul>
+      <li><a class="tab" href="#night-run">Night Run</a></li>
+      <li><a class="tab" href="#about">About</a></li>
+      <li><a class="tab" href="#arsenal">Arsenal</a></li>
+      <li><a class="tab" href="#services">Services</a></li>
+      <li><a class="tab" href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="top">
+  <!-- CH.0 title screen -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="k hero-left rv">
+        <div class="k-ink"></div><div class="k-fill"><div class="tone"></div></div>
+        <div class="k-body">
+          <span class="avail lb"><span class="dot"></span>Available for freelance</span>
+          <h1 class="sfx name" style="margin:0">JWAAN01</h1>
+          <div class="hd role">Freelance Full-Stack Developer</div>
+          <div class="cycle" aria-live="polite"><span id="role">Building premium web products for clients</span></div>
+          <div class="actions">
+            <span class="btn-wrap"><a class="btn" href="#contact"><span class="speed w"></span>Start a project</a></span>
+            <span class="btn-wrap"><a class="btn alt" href="https://github.com/jwaan01"><span class="speed"></span>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.82 1.19 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>GitHub</a></span>
+          </div>
+        </div>
+      </div>
+      <div class="k hero-right rv r" id="slab" aria-hidden="true">
+        <div class="k-ink"></div>
+        <div class="k-fill"><div class="focus"></div><div class="tone"></div></div>
+        <div class="k-body">
+          <div class="burst-wrap"><div class="burst">
+            <svg viewBox="-150 -150 300 300"><polygon id="bp" fill="#0f0f14" transform="translate(9 9)"/><polygon id="bp2" fill="#ffd60a" stroke="#0f0f14" stroke-width="6" stroke-linejoin="miter"/></svg>
+            <b>&lt;/&gt;</b>
+          </div></div>
+          <span class="sfx s1">DOOM</span>
+          <span class="sfx s2">FULL STACK!!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interlude: the self-playing game -->
+  <section class="sec" id="night-run">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="chapter lb">Interlude · Auto-play</span><h2>Night Run</h2></div>
+        <p>A ninja clears DEADLINE and MERGE CONFLICT walls, slashes BUG drones and grabs commits. Runs forever.</p>
+      </div>
+      <a class="game rv" href="https://github.com/jwaan01" aria-label="Night Run, self-playing endless runner">
+        <img src="night-run.svg" width="1000" height="340" alt="Night Run: a ninja runs across night rooftops, jumping walls labelled DEADLINE and MERGE CONFLICT and slashing BUG drones.">
+      </a>
+      <div class="next lb" aria-hidden="true"><span>Next</span></div>
+    </div>
+  </section>
+
+  <!-- CH.1 about -->
+  <section class="sec" id="about">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="chapter lb">Chapter 01</span><h2>About</h2></div>
+        <p>Production mindset. Clean architecture. Shipped for real clients.</p>
+      </div>
+      <div class="about">
+        <div class="k pa rv">
+          <div class="k-ink"></div><div class="k-fill"><div class="focus"></div><div class="tone"></div></div>
+          <div class="k-body">
+            <span class="chapter lb">Who?!</span>
+            <div class="sfx who"><span class="a">QUAN</span><br><span class="b">HUYNH</span></div>
+            <span class="eng">Freelance full-stack engineer</span>
+          </div>
+        </div>
+        <div class="k pb rv r">
+          <div class="k-ink"></div><div class="k-fill"><div class="tone" style="opacity:.25"></div></div>
+          <div class="k-body">
+            <div class="bubble">
+              <span class="who lb">JWAAN01</span>
+              <p>I deliver full-stack products for real clients. React on the front, Node.js on the back. Fast, responsive and built to be maintained.</p>
+            </div>
+          </div>
+        </div>
+        <div class="k pc rv r">
+          <div class="k-ink"></div><div class="k-fill"></div>
+          <div class="k-body">
+            <h3 class="lb" style="font-size:19px">Languages mastered <small>six and counting</small></h3>
+            <div class="badges">
+              <span class="badge" tabindex="0">C</span><span class="badge" tabindex="0">C++</span><span class="badge" tabindex="0">C#</span>
+              <span class="badge" tabindex="0">Java</span><span class="badge" tabindex="0">JavaScript</span><span class="badge" tabindex="0">Python</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="next lb" aria-hidden="true"><span>Next</span></div>
+    </div>
+  </section>
+
+  <!-- CH.2 arsenal -->
+  <section class="sec" id="arsenal">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="chapter lb">Chapter 02</span><h2>Tech Arsenal</h2></div>
+        <div class="combo" aria-live="polite">
+          <span class="n" id="combo">0</span><span class="h">HIT!!</span>
+          <span class="full" id="full" hidden>FULL COMBO!</span>
+          <span class="hint" id="hint">Hover every slot</span>
+        </div>
+      </div>
+      <div class="slots" id="slots"></div>
+      <div class="next lb" aria-hidden="true"><span>Next</span></div>
+    </div>
+  </section>
+
+  <!-- CH.3 services -->
+  <section class="sec" id="services">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="chapter lb">Chapter 03 · Commissions open</span><h2>Freelance Services</h2></div>
+        <p>Production-focused solutions for startups and business clients.</p>
+      </div>
+      <div class="svc" id="svc"></div>
+      <div class="next lb" aria-hidden="true"><span>Next</span></div>
+    </div>
+  </section>
+
+  <!-- Final chapter: contact -->
+  <section class="sec" id="contact">
+    <div class="wrap contact">
+      <div class="k cl rv">
+        <div class="k-ink"></div><div class="k-fill"></div>
+        <div class="k-body">
+          <span class="chapter lb">Final chapter · Contact</span>
+          <div class="sfx big">LET'S BUILD</div><br>
+          <div class="sfx big2">SOMETHING!</div>
+          <ul class="menu">
+            <li><a href="https://github.com/jwaan01"><span class="tri"></span><span class="lbl">GitHub</span><span class="val">github.com/jwaan01</span><span></span></a></li>
+            <li><div class="row" tabindex="-1"><span class="tri"></span><span class="lbl">Email</span><a class="val" href="mailto:aovkiz123@gmail.com" style="padding:0;display:inline;color:inherit">aovkiz123@gmail.com</a><button class="copy" type="button" id="copy">Copy</button></div></li>
+            <li><a href="https://www.linkedin.com/in/quan-huynh-208b38403/"><span class="tri"></span><span class="lbl">LinkedIn</span><span class="val">Quan Huynh</span><span></span></a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="k cr rv r" aria-hidden="true">
+        <div class="k-ink"></div><div class="k-fill"><div class="focus"></div><div class="tone"></div></div>
+        <div class="k-body">
+          <div class="burst-wrap"><div class="burst">
+            <svg viewBox="-150 -150 300 300"><polygon class="bp" fill="#0f0f14" transform="translate(9 9)"/><polygon class="bp2" fill="#ffd60a" stroke="#0f0f14" stroke-width="6" stroke-linejoin="miter"/></svg>
+            <b>GO!!</b>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap tbc">
+    <a class="arrow" href="#top"><span>To be continued</span></a>
+    <small>Thanks for reading · JWAAN01</small>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Burst polygons (impact stars) — deterministic spikes
+  function star(spikes, ro, ri, seed) {
+    let s = seed, rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, p = [];
+    for (let i = 0; i < spikes * 2; i++) {
+      const a = Math.PI * i / spikes - Math.PI / 2, r = i % 2 ? ri * (0.92 + rnd() * .12) : ro * (0.86 + rnd() * .22);
+      p.push((r * Math.cos(a)).toFixed(1) + ',' + (r * Math.sin(a)).toFixed(1));
+    }
+    return p.join(' ');
+  }
+  const p1 = star(15, 135, 92, 9), p2 = star(13, 132, 92, 31);
+  document.getElementById('bp').setAttribute('points', p1);
+  document.getElementById('bp2').setAttribute('points', p1);
+  document.querySelectorAll('.bp, .bp2').forEach(el => el.setAttribute('points', p2));
+
+  // Role line cycles like the README hero
+  const roles = ['Building premium web products for clients', 'React · Node.js · Python · Docker', 'From idea to deployment, clean architecture', 'Fast, responsive, maintainable systems'];
+  const roleEl = document.getElementById('role'); let ri = 0;
+  if (!reduce) setInterval(() => { ri = (ri + 1) % roles.length; roleEl.textContent = roles[ri]; roleEl.animate([{ transform: 'skewX(6deg) translateX(-14px)', opacity: 0 }, { transform: 'skewX(6deg)', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.7,0,.2,1)' }); }, 3000);
+
+  // Pointer parallax on the impact bursts
+  document.querySelectorAll('.hero-right, .cr').forEach(slab => {
+    const wrap = slab.querySelector('.burst-wrap');
+    slab.addEventListener('pointermove', e => {
+      const r = slab.getBoundingClientRect();
+      wrap.style.setProperty('--mx', ((e.clientX - r.left) / r.width - .5) * 28 + 'px');
+      wrap.style.setProperty('--my', ((e.clientY - r.top) / r.height - .5) * 28 + 'px');
+    });
+    slab.addEventListener('pointerleave', () => { wrap.style.setProperty('--mx', '0px'); wrap.style.setProperty('--my', '0px'); });
+  });
+
+  // Arsenal slots + hover combo
+  const tech = ['React', 'Node.js', 'Python', 'JavaScript', 'Java', 'C#', 'C++', 'C', 'HTML', 'CSS', 'Docker', 'Git', 'GitHub', 'VS Code'];
+  const slots = document.getElementById('slots'), comboEl = document.getElementById('combo'), full = document.getElementById('full'), hint = document.getElementById('hint');
+  const hits = new Set();
+  tech.forEach((t, i) => {
+    const d = document.createElement('div');
+    d.className = 'k slot'; d.tabIndex = 0; d.setAttribute('role', 'img'); d.setAttribute('aria-label', t);
+    d.innerHTML = '<div class="k-ink"></div><div class="k-fill"><div class="speed w"></div></div><div class="k-body"><b>' + t + '</b></div><i>' + String(i + 1).padStart(2, '0') + '</i>';
+    const hit = () => {
+      if (hits.has(i)) return;
+      hits.add(i); d.classList.add('hit');
+      comboEl.textContent = hits.size; comboEl.classList.remove('bump'); void comboEl.offsetWidth; comboEl.classList.add('bump');
+      if (hits.size === tech.length) { full.hidden = false; hint.hidden = true; }
+    };
+    d.addEventListener('pointerenter', hit); d.addEventListener('focus', hit);
+    slots.appendChild(d);
+  });
+
+  // Services
+  const ICON = {
+    globe: '<svg viewBox="-16 -16 32 32" fill="none" stroke="currentColor"><circle r="13" stroke-width="3.5"/><ellipse rx="5.5" ry="13" stroke-width="3"/><path d="M-13 0H13M-11 -6.5H11M-11 6.5H11" stroke-width="2.6"/></svg>',
+    chart: '<svg viewBox="-16 -16 32 32" fill="currentColor"><path d="M-14 13H14" stroke="currentColor" stroke-width="3.5"/><rect x="-12" y="-1" width="6" height="12"/><rect x="-3" y="-8" width="6" height="19"/><rect x="6" y="-14" width="6" height="25"/></svg>',
+    cart: '<svg viewBox="-16 -16 32 32" fill="currentColor"><path d="M-15 -12H-9L-4 7H10L14 -6H-7" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M-6 -6H14L10 7H-4Z"/><circle cx="-2" cy="12.5" r="3"/><circle cx="8" cy="12.5" r="3"/></svg>',
+    plug: '<svg viewBox="-16 -16 32 32" fill="currentColor"><path d="M-6 -15V-6M6 -15V-6M0 9V15" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M-11 -7H11V0A11 11 0 0 1 -11 0Z"/></svg>',
+    bolt: '<svg viewBox="-16 -16 32 32" fill="currentColor"><path d="M3 -16L-11 2H-1L-4 16L11 -3H1Z"/></svg>'
+  };
+  const services = [
+    ['Business Websites', 'Landing pages, company sites and conversion-focused UX.', 'globe'],
+    ['Dashboards & Admin', 'Internal tools, analytics and workflow control.', 'chart'],
+    ['E-commerce Systems', 'Catalog, cart, checkout and order processing.', 'cart'],
+    ['API Integrations & Automation', 'Payments, third-party APIs and custom workflow automation.', 'plug'],
+    ['Performance & Refactoring', 'Speed optimization, maintainability and code cleanup.', 'bolt']
+  ];
+  const svc = document.getElementById('svc');
+  services.forEach(([t, d, ic], i) => {
+    const c = document.createElement('article');
+    c.className = 'k card rv' + (i > 2 ? ' wide' : '') + (i % 2 ? ' r' : '');
+    c.innerHTML = '<div class="k-ink"></div><div class="k-fill"><div class="speed"></div></div><div class="k-body"><div class="ic">' + ICON[ic] + '</div><div style="min-width:0"><h3>' + t.replace('&', '&amp;') + '</h3><p>' + d + '</p></div></div>';
+    svc.appendChild(c);
+  });
+
+  // Copy email
+  const copy = document.getElementById('copy');
+  copy.addEventListener('click', () => {
+    const done = () => { copy.textContent = 'Copied'; setTimeout(() => copy.textContent = 'Copy', 1600); };
+    navigator.clipboard?.writeText('aovkiz123@gmail.com').then(done, () => {
+      const r = document.createRange(); r.selectNodeContents(copy.previousElementSibling);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r); copy.textContent = 'Selected';
+    });
+  });
+
+  // Click anywhere that isn't a control: an SFX pops where you hit
+  const words = ['BAM!', 'POW!', 'DOOM', 'ZING!', 'SLASH!', 'KRAK!'];
+  let wi = 0;
+  document.addEventListener('pointerdown', e => {
+    if (reduce || e.button !== 0 || e.target.closest('a, button, .slot, .badge, input')) return;
+    const p = document.createElement('span');
+    p.className = 'pop'; p.textContent = words[wi++ % words.length];
+    const x = Math.min(Math.max(e.pageX, 70), document.documentElement.clientWidth - 70);
+    p.style.left = x + 'px'; p.style.top = e.pageY + 'px';
+    document.body.appendChild(p); p.addEventListener('animationend', () => p.remove());
+  });
+
+  // Chapters slam in the first time they scroll into view (they are visible at rest)
+  if ('IntersectionObserver' in window && !reduce) {
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      if (en.isIntersecting && en.boundingClientRect.top > 0) { en.target.classList.add('go'); io.unobserve(en.target); }
+    }), { threshold: .2 });
+    requestAnimationFrame(() => document.querySelectorAll('.rv').forEach(el => {
+      if (el.getBoundingClientRect().top > innerHeight) io.observe(el);
+    }));
+  }
+
+  // Active chapter tab
+  const tabs = [...document.querySelectorAll('.nav a.tab')];
+  if ('IntersectionObserver' in window) {
+    const so = new IntersectionObserver(es => es.forEach(en => {
+      if (en.isIntersecting) tabs.forEach(t => t.classList.toggle('on', t.getAttribute('href') === '#' + en.target.id));
+    }), { rootMargin: '-45% 0px -50% 0px' });
+    ['night-run', 'about', 'arsenal', 'services', 'contact'].forEach(id => so.observe(document.getElementById(id)));
+  }
+})();
+</script>
