@@ -686,73 +686,89 @@ def services():
 # CH.4 — CONTACT (title-screen menu)
 # ----------------------------------------------------------------------------
 def contact():
-    W, H = 1000, 400
-    slab = [(640, 0), (W, 0), (W, H), (555, H)]
-    edge = [(628, 0), (W, 0), (W, H), (543, H)]
-    T_each = 2.2
-    T = T_each * len(CONTACTS)
-    pc = lambda s: f"{s / T * 100:.2f}%"
-    rows, kf = [], []
-    vx = 66 + max(text_width("hd", l, 30) for l, _ in CONTACTS) + 28
-    vsize = min(fit("bd6", v, 40 + 470 - 30 - (vx + 18), 17) for _, v in CONTACTS)
-    for i, (label, value) in enumerate(CONTACTS):
-        y = 214 + i * 58
-        s, en = i * T_each, (i + 1) * T_each
-        kf.append(
-            f"@keyframes m{i}{{0%,{pc(s)}{{opacity:0}}{pc(s + .01)},{pc(en)}{{opacity:1}}{pc(en + .01)},100%{{opacity:0}}}}"
-            f"@keyframes k{i}{{0%,{pc(s)}{{opacity:1}}{pc(s + .01)},{pc(en)}{{opacity:0}}{pc(en + .01)},100%{{opacity:1}}}}"
-        )
-        P = para(40, y, 470, 48, 10)
-        rows.append(
-            f'<g class="row" style="animation-delay:{.9 + i * .15:.2f}s">'
-            f'<g style="animation:k{i} {T}s infinite">'
-            f'<text x="66" y="{y + 34}" class="hd" font-size="30" fill="{INK}" data-alt="m{i}">{e(label)}</text>'
-            f'<text x="{vx}" y="{y + 32}" class="bd" font-size="{vsize}" fill="{INK_MUTED}" data-alt="m{i}">{e(value)}</text></g>'
-            f'<g style="opacity:0;animation:m{i} {T}s infinite">'
-            f'<polygon points="{pts(*P)}" fill="{INK}" transform="translate(9 9)"/>'
-            f'<polygon points="{pts(*P)}" fill="{RED}" stroke="{INK}" stroke-width="5"/>'
-            f'<g clip-path="url(#cr{i})" opacity=".35">{speed_lines(vx + 18 + text_width("bd6", value, vsize) + 16, y + 6, 490 - (vx + 18 + text_width("bd6", value, vsize) + 16), 36, 5, WHITE, 40 + i)}</g>'
-            f'<path d="M56 {y + 14} L72 {y + 24} L56 {y + 34} Z" fill="{WHITE}"/>'
-            f'<text x="84" y="{y + 34}" class="hd" font-size="30" fill="{WHITE}" data-alt="m{i}" data-box="50 {y} 500 {y + 48}">{e(label)}</text>'
-            f'<text x="{vx + 18}" y="{y + 32}" class="bd6" font-size="{vsize}" fill="{WHITE}" data-alt="m{i}" data-box="50 {y} 498 {y + 48}">{e(value)}</text></g>'
-            f"</g>"
-        )
-    clips = "".join(f'<clipPath id="cr{i}"><polygon points="{pts(*para(40, 214 + i * 58, 470, 48, 10))}"/></clipPath>'
-                    for i in range(len(CONTACTS)))
+    """Title panel of the contact chapter. The three rows are separate linked images."""
+    W, H = 1000, 236
+    slab = [(640, 0), (W, 0), (W, H), (590, H)]
+    edge = [(628, 0), (W, 0), (W, H), (578, H)]
+    go = fit("sfx", "GO!!", 96, 56)
     css = f"""
 .slab{{animation:slamR .55s {SLAM} .1s both}}
 .t1{{animation:pop .45s {POP} .45s both}}
 .t2{{animation:pop .45s {POP} .65s both}}
-.row{{animation:rise .45s ease both}}
 .bst{{animation:stamp .5s {POP} 1s both}}
 .bstb{{animation:beat 1s ease-in-out 1.6s infinite}}
 @keyframes beat{{0%,100%{{transform:scale(1)}}50%{{transform:scale(1.07) rotate(3deg)}}}}
-{''.join(kf)}
 """
     body = page(W, H, f"""
 <g class="slab">
   <polygon points="{pts(*edge)}" fill="{INK}"/>
   <polygon points="{pts(*slab)}" fill="{RED}"/>
   <g clip-path="url(#cs)">
-    <g class="spin"><g class="flick" opacity=".5">{focus_lines(800, 200, 110, 560, 110, WHITE, 21)}</g></g>
-    <rect x="540" width="460" height="{H}" fill="url(#tone)" opacity=".35" mask="url(#mS)"/>
+    <g class="spin"><g class="flick" opacity=".5">{focus_lines(805, 118, 80, 460, 100, WHITE, 21)}</g></g>
+    <rect x="560" width="440" height="{H}" fill="url(#tone)" opacity=".35" mask="url(#mS)"/>
   </g>
   <g class="bst fb"><g class="bstb fb">
-    {burst(800, 196, 118, 84, 13, VOLT, 31)}
-    <text x="800" y="{196 + fit("sfx", "GO!!", 116, 68) * .36:.0f}" text-anchor="middle" class="sfx" font-size="{fit("sfx", "GO!!", 116, 68)}" fill="{INK}" data-box="738 150 862 242">GO!!</text>
+    {burst(805, 118, 92, 64, 13, VOLT, 31)}
+    <text x="805" y="{118 + go * .36:.0f}" text-anchor="middle" class="sfx" font-size="{go}" fill="{INK}" data-box="755 80 855 160">GO!!</text>
   </g></g>
 </g>
 {chapter_tag(40, 30, "Final Chapter · Contact")}
 <g class="t1 fb">{sfx(44, 128, "LET'S BUILD", 58, RED, 6, box=(20, 50, 560, 145))}</g>
 <g class="t2 fb">{sfx(44, 188, "SOMETHING!", 46, WHITE, 5, box=(20, 140, 560, 205))}</g>
-{''.join(rows)}
 """)
     defs = (
         f'<clipPath id="cs"><polygon points="{pts(*slab)}"/></clipPath>'
-        f'<mask id="mS"><rect x="540" width="460" height="{H}" fill="url(#fadeUp)"/></mask>'
-        f"{clips}"
+        f'<mask id="mS"><rect x="560" width="440" height="{H}" fill="url(#fadeUp)"/></mask>'
     )
-    return svg(W, H, "Contact: " + ", ".join(f"{a} {b}" for a, b in CONTACTS), body, css, defs)
+    return svg(W, H, "Let's build something", body, css, defs)
+
+
+def contact_row(i):
+    """One clickable contact row (the README wraps it in a link).
+
+    READMEs cannot react to the pointer, so a highlight sweeps the three rows
+    in turn, like a title-screen cursor, to show they are buttons.
+    """
+    label, value = CONTACTS[i]
+    W, H = 1000, 92
+    T_each, n = 2.2, len(CONTACTS)
+    T = T_each * n
+    a, b = i * T_each / T * 100, (i + 1) * T_each / T * 100
+    P = para(14, 8, 950, 66, 16)
+    lw = max(text_width("hd", l, 34) for l, _ in CONTACTS)
+    vx = 92 + lw + 34
+    open_w = text_width("lb", "Open", 16) + 58
+    ox = 950 - open_w - 22
+    vsize = fit("bd6", value, ox - vx - 24, 21)
+    css = f"""
+.on{{opacity:0;animation:on {T}s steps(1) infinite}}
+@keyframes on{{0%{{opacity:0}}{a:.2f}%{{opacity:1}}{b:.2f}%,100%{{opacity:0}}}}
+.off{{animation:off {T}s steps(1) infinite}}
+@keyframes off{{0%{{opacity:1}}{a:.2f}%{{opacity:0}}{b:.2f}%,100%{{opacity:1}}}}
+.go{{animation:nudge .9s ease-in-out infinite}}
+@keyframes nudge{{50%{{transform:translateX(5px)}}}}
+"""
+    tx = f'<text x="92" y="53" class="hd" font-size="34" fill="{{c}}" data-alt="{{alt}}" data-box="40 8 {vx - 10} 74">{e(label)}</text>'
+    vt = f'<text x="{vx}" y="51" class="{{cls}}" font-size="{vsize}" fill="{{c}}" data-alt="{{alt}}" data-box="{vx - 4} 8 {ox - 8} 74">{e(value)}</text>'
+    tag = (f'<g class="go"><polygon points="{pts(*para(ox, 24, open_w, 32, 8))}" fill="{INK}"/>'
+           f'<text x="{ox + 20}" y="46" class="lb" font-size="16" fill="{VOLT}" data-alt="tag" data-box="{ox + 8} 24 {ox + open_w - 26} 56">Open</text>'
+           f'<path d="M{ox + open_w - 26} 33 L{ox + open_w - 16} 40 L{ox + open_w - 26} 47" stroke="{VOLT}" stroke-width="3" fill="none"/></g>')
+    body = f"""
+<polygon points="{pts(*P)}" fill="{RED}" transform="translate(8 8)"/>
+<g class="off">
+  <polygon points="{pts(*P)}" fill="{PAPER}" stroke="{INK}" stroke-width="5"/>
+  {tx.format(c=INK, alt="m")}{vt.format(cls="bd", c=INK_MUTED, alt="m")}
+</g>
+<g class="on">
+  <polygon points="{pts(*P)}" fill="{RED}" stroke="{INK}" stroke-width="5"/>
+  <g clip-path="url(#cp)" opacity=".35">{speed_lines(vx + text_width("bd6", value, vsize) + 20, 16, ox - (vx + text_width("bd6", value, vsize) + 40), 50, 6, WHITE, 40 + i)}</g>
+  <path d="M52 27 L72 41 L52 55 Z" fill="{WHITE}"/>
+  {tx.format(c=WHITE, alt="m")}{vt.format(cls="bd6", c=WHITE, alt="m")}
+</g>
+{tag}
+"""
+    defs = f'<clipPath id="cp"><polygon points="{pts(*P)}"/></clipPath>'
+    return svg(W, H, f"{label}: {value}", body, css, defs)
 
 
 # ----------------------------------------------------------------------------
@@ -1155,6 +1171,9 @@ def main():
         "tech-arsenal.svg": tech(),
         "freelance-services.svg": services(),
         "contact-card.svg": contact(),
+        "contact-github.svg": contact_row(0),
+        "contact-email.svg": contact_row(1),
+        "contact-linkedin.svg": contact_row(2),
         "divider.svg": divider(),
         "footer.svg": footer(),
     }

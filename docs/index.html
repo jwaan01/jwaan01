@@ -86,12 +86,9 @@ a { color: inherit }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 10px }
 .logo { font: 400 26px/1 var(--f-disp); color: var(--line); background: var(--white); padding: 4px 14px 5px; text-decoration: none;
   transform: rotate(-4deg); box-shadow: 6px 6px 0 var(--red); transition: transform .12s, box-shadow .12s }
-.logo:hover { transform: rotate(-4deg) translate(-2px, -2px); box-shadow: 9px 9px 0 var(--red) }
 .nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; justify-content: flex-end }
 .nav a.tab { position: relative; display: block; padding: 8px 14px; font: italic 900 19px/1 var(--f-head); text-transform: uppercase; letter-spacing: 1px; text-decoration: none; color: var(--mute); isolation: isolate }
-.nav a.tab::before { content: ""; position: absolute; inset: 0; background: var(--red); z-index: -1; transform: skewX(-20deg) scaleX(0); transform-origin: left; transition: transform .16s cubic-bezier(.7, 0, .2, 1) }
-.nav a.tab:hover, .nav a.tab:focus-visible, .nav a.tab.on { color: var(--white) }
-.nav a.tab:hover::before, .nav a.tab:focus-visible::before, .nav a.tab.on::before { transform: skewX(-20deg) scaleX(1) }
+.nav a.tab::before { content: ""; position: absolute; inset: 0; background: var(--red); z-index: -1; transform: skewX(-20deg) scaleX(0); transform-origin: left; transition: transform .16s cubic-bezier(.7, 0, .2, 1) } .nav a.tab:focus-visible, .nav a.tab.on { color: var(--white) } .nav a.tab:focus-visible::before, .nav a.tab.on::before { transform: skewX(-20deg) scaleX(1) }
 
 /* ---------- buttons (DS: hover lifts -3px, shadow pushes out, speed lines; press stamps +5px) ---------- */
 .btn { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px 13px; border: 0; cursor: pointer; text-decoration: none;
@@ -100,10 +97,6 @@ a { color: inherit }
 .btn-wrap { display: inline-block; filter: drop-shadow(6px 6px 0 var(--line)); transition: filter .08s, transform .08s }
 .btn-wrap.on-dark { filter: drop-shadow(6px 6px 0 var(--white)) }
 .btn .speed { opacity: 0 }
-.btn-wrap:hover { transform: translate(-3px, -3px); filter: drop-shadow(10px 10px 0 var(--line)) }
-.btn-wrap.on-dark:hover { filter: drop-shadow(10px 10px 0 var(--white)) }
-.btn-wrap:hover .speed { opacity: .5 }
-.btn-wrap:active { transform: translate(5px, 5px); filter: drop-shadow(1px 1px 0 var(--line)) }
 .btn.alt { background: var(--white); color: var(--line) }
 .btn svg { width: 22px; height: 22px; flex: none }
 
@@ -116,24 +109,21 @@ a { color: inherit }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--volt); animation: blink 1.2s steps(1) infinite }
 @keyframes blink { 50% { opacity: .2 } }
 .name { font-size: clamp(30px, calc((84cqi - 110px) / 7.1), 96px); color: var(--red); -webkit-text-stroke: 9px var(--line); cursor: default; transition: transform .1s }
-.name:hover { animation: glitch .32s steps(1) 2 }
 @keyframes glitch { 0% { transform: skewX(-8deg) translate(-4px, 1px); text-shadow: 6px 0 var(--cyan) } 33% { transform: skewX(-8deg) translate(4px, -2px); text-shadow: -6px 0 var(--volt) } 66% { transform: skewX(-8deg) translate(-2px, 0) } 100% { transform: skewX(-8deg) } }
 .role { font-size: clamp(24px, 3vw, 34px) }
 .cycle { position: relative; background: var(--white); border: 5px solid var(--line); box-shadow: 6px 6px 0 var(--line); padding: 10px 16px; min-height: 56px; font-weight: 600; font-size: 17px; transform: skewX(-6deg) }
 .cycle span { display: block; transform: skewX(6deg) }
 .hero-left .actions { display: flex; flex-wrap: wrap; gap: 18px; margin-top: auto }
-.hero-right { --cut: polygon(14% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--red); --sh: var(--white); overflow: visible; cursor: crosshair }
+.hero-right { --cut: polygon(14% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--red); --sh: var(--white); overflow: visible; cursor: default }
 .hero-right .k-fill .tone { opacity: .35 }
 .burst-wrap { position: absolute; left: 50%; top: 50%; width: min(300px, 70%); aspect-ratio: 1; transform: translate(-50%, -50%) translate(var(--mx, 0px), var(--my, 0px)); transition: transform .2s ease-out }
 .burst { width: 100%; height: 100%; display: grid; place-items: center; transition: transform .15s cubic-bezier(.2, 1.6, .4, 1) }
 .burst svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible }
 .burst b { position: relative; font: 400 clamp(48px, 6vw, 72px)/1 var(--f-sfx); color: var(--line) }
-.hero-right:hover .burst { transform: scale(1.08) rotate(-4deg); animation: jit .3s steps(1) infinite }
 @keyframes jit { 0% { translate: 0 0 } 25% { translate: 3px -2px } 50% { translate: -2px 2px } 75% { translate: -3px -1px } }
 .hero-right .sfx { position: absolute; color: var(--white); font-size: clamp(30px, 4vw, 44px); -webkit-text-stroke: 5px var(--line) }
 .hero-right .s1 { right: 22px; top: 18px; transform: skewX(-8deg) rotate(8deg) }
 .hero-right .s2 { left: 26%; bottom: 22px; color: var(--volt); font-size: clamp(22px, 3vw, 30px); transform: skewX(-8deg) rotate(-6deg) }
-.hero-right:hover .s1 { animation: jit .25s steps(1) infinite }
 
 /* ---------- section headers ---------- */
 .sec { padding-block: 48px 8px }
@@ -148,7 +138,6 @@ a { color: inherit }
 /* ---------- night run ---------- */
 .game { display: block; border: 5px solid var(--white); box-shadow: 9px 9px 0 var(--red); transition: transform .12s, box-shadow .12s; background: var(--ink) }
 .game img { display: block; width: 100%; height: auto }
-.game:hover { transform: translate(-3px, -3px); box-shadow: 13px 13px 0 var(--red) }
 .game-note { margin: 18px 0 0; color: var(--mute); font-size: 15px }
 
 /* ---------- about page (three komas) ---------- */
@@ -163,7 +152,6 @@ a { color: inherit }
 .pb .k-body { padding: 26px 26px 34px 40px }
 .bubble { position: relative; background: var(--white); border: 5px solid var(--line); border-radius: 50%; padding: 30px 46px; text-align: center; color: var(--line); filter: drop-shadow(6px 6px 0 var(--line)); transition: transform .15s cubic-bezier(.2, 1.6, .4, 1) }
 .bubble::after { content: ""; position: absolute; left: 12%; bottom: -24px; width: 44px; height: 34px; background: var(--white); border-left: 5px solid var(--line); border-bottom: 5px solid var(--line); transform: skewX(-38deg) rotate(-8deg) }
-.bubble:hover { transform: scale(1.03) rotate(-1deg) }
 .bubble .who { display: block; color: var(--red-deep); margin-bottom: 6px }
 .bubble p { margin: 0; font-weight: 600; font-size: 18px; line-height: 1.5 }
 .pc { --cut: polygon(1.5% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--ink-2); --sh: var(--red); filter: none }
@@ -172,8 +160,7 @@ a { color: inherit }
 .pc h3 small { color: var(--mute); font: 400 15px var(--f-body); letter-spacing: 0; text-transform: none; margin-left: 8px }
 .badges { display: flex; flex-wrap: wrap; gap: 10px }
 .badge { font: italic 900 22px/1 var(--f-head); text-transform: uppercase; padding: 10px 18px 9px; background: var(--paper); color: var(--line); border: 4px solid var(--line); box-shadow: 4px 4px 0 var(--red); transform: skewX(-9deg); cursor: default; transition: transform .14s cubic-bezier(.2, 1.6, .4, 1), background .1s, color .1s, box-shadow .1s }
-.badge:nth-child(odd) { background: var(--red); color: var(--white); box-shadow: 4px 4px 0 var(--white) }
-.badge:hover, .badge:focus-visible { transform: skewX(-9deg) translateY(-8px) rotate(-3deg) scale(1.06); background: var(--volt); color: var(--line); box-shadow: 7px 7px 0 var(--red) }
+.badge:nth-child(odd) { background: var(--red); color: var(--white); box-shadow: 4px 4px 0 var(--white) } .badge:focus-visible { transform: skewX(-9deg) translateY(-8px) rotate(-3deg) scale(1.06); background: var(--volt); color: var(--line); box-shadow: 7px 7px 0 var(--red) }
 
 /* ---------- arsenal slots + combo ---------- */
 .combo { display: flex; align-items: baseline; gap: 10px; min-height: 70px }
@@ -185,15 +172,11 @@ a { color: inherit }
 .combo .full[hidden] { display: none }
 .combo .hint { color: var(--mute); font-size: 15px; align-self: center }
 .slots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px 12px }
-.slot { position: relative; height: 84px; display: grid; place-items: center; cursor: crosshair; outline: none; --cut: polygon(9% 0, 100% 0, 91% 100%, 0 100%); --fill: var(--ink-2); --sh: var(--ink-3) }
+.slot { position: relative; height: 84px; display: grid; place-items: center; cursor: default; outline: none; --cut: polygon(9% 0, 100% 0, 91% 100%, 0 100%); --fill: var(--ink-2); --sh: var(--ink-3) }
 .slot .k-body { display: grid; place-items: center; width: 100% }
 .slot b { font: italic 900 clamp(17px, 2vw, 23px)/1 var(--f-head); text-transform: uppercase; color: var(--white); letter-spacing: .5px; white-space: nowrap }
 .slot i { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%) skewX(-10deg); background: var(--volt); color: var(--line); border: 3px solid var(--line); font: 800 13px/1 var(--f-head); font-style: normal; padding: 3px 8px }
-.slot .k-ink { background: var(--white) }
-.slot:hover, .slot:focus-visible, .slot.hit { --fill: var(--red) }
-.slot:hover, .slot:focus-visible { transform: translate(-3px, -4px); filter: drop-shadow(8px 8px 0 var(--volt)) }
-.slot.hit:not(:hover) { filter: drop-shadow(5px 5px 0 var(--red-deep)) }
-.slot:hover .speed, .slot:focus-visible .speed { opacity: .35 }
+.slot .k-ink { background: var(--white) } .slot:focus-visible, .slot.hit { --fill: var(--red) } .slot:focus-visible { transform: translate(-3px, -4px); filter: drop-shadow(8px 8px 0 var(--volt)) } .slot:focus-visible .speed { opacity: .35 }
 
 /* ---------- services ---------- */
 .svc { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px 18px }
@@ -205,10 +188,6 @@ a { color: inherit }
 .card h3 { margin: 2px 0 8px; font: italic 900 25px/1 var(--f-head); text-transform: uppercase; text-wrap: balance }
 .card h3::after { content: ""; display: block; width: 56px; height: 5px; margin-top: 9px; background: var(--red); transform: skewX(-20deg); transform-origin: left; transition: width .2s cubic-bezier(.7, 0, .2, 1) }
 .card p { margin: 0; color: var(--ink-muted); font-size: 15.5px; line-height: 1.5 }
-.card:hover { transform: translate(-3px, -3px); filter: drop-shadow(11px 11px 0 var(--red)) }
-.card:hover .ic { background: var(--red) }
-.card:hover h3::after { width: 100% }
-.card:hover .speed { opacity: .18 }
 .card .speed { -webkit-mask-image: linear-gradient(90deg, transparent 55%, #000 80%, transparent); mask-image: linear-gradient(90deg, transparent 55%, #000 80%, transparent) }
 
 /* ---------- contact (title screen menu) ---------- */
@@ -230,7 +209,6 @@ a { color: inherit }
 .copy { font: 800 13px/1 var(--f-head); letter-spacing: 1.5px; text-transform: uppercase; background: var(--line); color: var(--volt); border: 0; padding: 7px 10px; cursor: pointer; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%) }
 .cr { --cut: polygon(12% 0, 100% 0, 100% 100%, 0 100%); --fill: var(--red); --sh: var(--white); min-height: 320px }
 .cr .burst-wrap { width: min(260px, 70%) }
-.cr:hover .burst { transform: scale(1.1) rotate(5deg); animation: jit .3s steps(1) infinite }
 
 /* ---------- footer ---------- */
 footer { padding-block: 52px 46px }
@@ -238,7 +216,6 @@ footer { padding-block: 52px 46px }
 .arrow { position: relative; display: inline-block; filter: drop-shadow(8px 8px 0 var(--white)); transition: transform .2s cubic-bezier(.2, 1.6, .4, 1) }
 .arrow span { display: block; background: var(--red); color: var(--white); font: italic 900 clamp(26px, 4vw, 40px)/1 var(--f-head); text-transform: uppercase; letter-spacing: 3px; padding: 20px 90px 20px 46px;
   clip-path: polygon(0 18%, 82% 18%, 82% 0, 100% 50%, 82% 100%, 82% 82%, 0 82%, 5% 50%) }
-.arrow:hover { transform: translateX(14px) }
 .tbc small { color: var(--mute); font: 800 14px var(--f-head); letter-spacing: 2px; text-transform: uppercase }
 
 /* ---------- click SFX + scroll entrances ---------- */
@@ -367,8 +344,8 @@ footer { padding-block: 52px 46px }
           <div class="k-body">
             <h3 class="lb" style="font-size:19px">Languages mastered <small>six and counting</small></h3>
             <div class="badges">
-              <span class="badge" tabindex="0">C</span><span class="badge" tabindex="0">C++</span><span class="badge" tabindex="0">C#</span>
-              <span class="badge" tabindex="0">Java</span><span class="badge" tabindex="0">JavaScript</span><span class="badge" tabindex="0">Python</span>
+              <span class="badge">C</span><span class="badge">C++</span><span class="badge">C#</span>
+              <span class="badge">Java</span><span class="badge">JavaScript</span><span class="badge">Python</span>
             </div>
           </div>
         </div>
@@ -382,11 +359,7 @@ footer { padding-block: 52px 46px }
     <div class="wrap">
       <div class="sec-head">
         <div><span class="chapter lb">Chapter 02</span><h2>Tech Arsenal</h2></div>
-        <div class="combo" aria-live="polite">
-          <span class="n" id="combo">0</span><span class="h">HIT!!</span>
-          <span class="full" id="full" hidden>FULL COMBO!</span>
-          <span class="hint" id="hint">Hover every slot</span>
-        </div>
+        <p>Every slot loaded. Ready to deploy.</p>
       </div>
       <div class="slots" id="slots"></div>
       <div class="next lb" aria-hidden="true"><span>Next</span></div>
@@ -464,32 +437,13 @@ footer { padding-block: 52px 46px }
   const roleEl = document.getElementById('role'); let ri = 0;
   if (!reduce) setInterval(() => { ri = (ri + 1) % roles.length; roleEl.textContent = roles[ri]; roleEl.animate([{ transform: 'skewX(6deg) translateX(-14px)', opacity: 0 }, { transform: 'skewX(6deg)', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.7,0,.2,1)' }); }, 3000);
 
-  // Pointer parallax on the impact bursts
-  document.querySelectorAll('.hero-right, .cr').forEach(slab => {
-    const wrap = slab.querySelector('.burst-wrap');
-    slab.addEventListener('pointermove', e => {
-      const r = slab.getBoundingClientRect();
-      wrap.style.setProperty('--mx', ((e.clientX - r.left) / r.width - .5) * 28 + 'px');
-      wrap.style.setProperty('--my', ((e.clientY - r.top) / r.height - .5) * 28 + 'px');
-    });
-    slab.addEventListener('pointerleave', () => { wrap.style.setProperty('--mx', '0px'); wrap.style.setProperty('--my', '0px'); });
-  });
-
-  // Arsenal slots + hover combo
+  // Arsenal slots
   const tech = ['React', 'Node.js', 'Python', 'JavaScript', 'Java', 'C#', 'C++', 'C', 'HTML', 'CSS', 'Docker', 'Git', 'GitHub', 'VS Code'];
-  const slots = document.getElementById('slots'), comboEl = document.getElementById('combo'), full = document.getElementById('full'), hint = document.getElementById('hint');
-  const hits = new Set();
+  const slots = document.getElementById('slots');
   tech.forEach((t, i) => {
     const d = document.createElement('div');
-    d.className = 'k slot'; d.tabIndex = 0; d.setAttribute('role', 'img'); d.setAttribute('aria-label', t);
-    d.innerHTML = '<div class="k-ink"></div><div class="k-fill"><div class="speed w"></div></div><div class="k-body"><b>' + t + '</b></div><i>' + String(i + 1).padStart(2, '0') + '</i>';
-    const hit = () => {
-      if (hits.has(i)) return;
-      hits.add(i); d.classList.add('hit');
-      comboEl.textContent = hits.size; comboEl.classList.remove('bump'); void comboEl.offsetWidth; comboEl.classList.add('bump');
-      if (hits.size === tech.length) { full.hidden = false; hint.hidden = true; }
-    };
-    d.addEventListener('pointerenter', hit); d.addEventListener('focus', hit);
+    d.className = 'k slot'; d.setAttribute('role', 'img'); d.setAttribute('aria-label', t);
+    d.innerHTML = '<div class="k-ink"></div><div class="k-fill"></div><div class="k-body"><b>' + t + '</b></div><i>' + String(i + 1).padStart(2, '0') + '</i>';
     slots.appendChild(d);
   });
 
@@ -524,18 +478,6 @@ footer { padding-block: 52px 46px }
       const r = document.createRange(); r.selectNodeContents(copy.previousElementSibling);
       const s = getSelection(); s.removeAllRanges(); s.addRange(r); copy.textContent = 'Selected';
     });
-  });
-
-  // Click anywhere that isn't a control: an SFX pops where you hit
-  const words = ['BAM!', 'POW!', 'DOOM', 'ZING!', 'SLASH!', 'KRAK!'];
-  let wi = 0;
-  document.addEventListener('pointerdown', e => {
-    if (reduce || e.button !== 0 || e.target.closest('a, button, .slot, .badge, input')) return;
-    const p = document.createElement('span');
-    p.className = 'pop'; p.textContent = words[wi++ % words.length];
-    const x = Math.min(Math.max(e.pageX, 70), document.documentElement.clientWidth - 70);
-    p.style.left = x + 'px'; p.style.top = e.pageY + 'px';
-    document.body.appendChild(p); p.addEventListener('animationend', () => p.remove());
   });
 
   // Chapters slam in the first time they scroll into view (they are visible at rest)

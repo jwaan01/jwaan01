@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
     const issues = await p.evaluate((name) => {
       const svg = document.documentElement, W = +svg.getAttribute('width'), H = +svg.getAttribute('height');
       const o = svg.getBoundingClientRect();
-      const framed = !/divider/.test(name), m = framed ? 15 : 0;
+      const framed = !/divider|contact-(github|email|linkedin)/.test(name), m = framed ? 15 : 0;
       const out = [];
       // fonts really loaded?
       for (const fam of ['HTSfx','HTHead','HTLabel','HTBody','HTBodySemi']) {
