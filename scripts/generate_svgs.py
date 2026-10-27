@@ -797,12 +797,11 @@ def footer():
     W, H = 1000, 170
     arrow = [(60, 58), (640, 58), (640, 34), (720, 90), (640, 146), (640, 122), (60, 122), (84, 90)]
     css = f"""
-.arr{{animation:arr 7s {SLAM} infinite}}
-@keyframes arr{{0%{{transform:translateX(-780px)}}10%,88%{{transform:none}}100%{{transform:translateX(1100px)}}}}
+.arr{{animation:arr .8s {SLAM} .2s both}}
+@keyframes arr{{from{{transform:translateX(-780px)}}to{{transform:none}}}}
 .push{{animation:push 1.2s ease-in-out infinite}}
 @keyframes push{{50%{{transform:translateX(8px)}}}}
-.cont{{animation:cont 7s steps(1) infinite}}
-@keyframes cont{{0%,12%{{opacity:0}}13%,88%{{opacity:1}}89%,100%{{opacity:0}}}}
+.cont{{animation:stamp .45s {POP} 1s both}}
 """
     body = page(W, H, f"""
 <rect width="{W}" height="{H}" fill="url(#toneF)" opacity=".3" mask="url(#mF)"/>
@@ -811,7 +810,7 @@ def footer():
   <g clip-path="url(#ca)" opacity=".3">{speed_lines(90, 64, 540, 8, 4, WHITE, 90)}{speed_lines(90, 110, 540, 8, 4, WHITE, 91)}</g>
   <text x="360" y="104" data-box="90 58 640 122" text-anchor="middle" class="hd" font-size="{fit("hd", "To be continued", 470, 42, 3)}" fill="{WHITE}" letter-spacing="3">To be continued</text>
 </g></g>
-<g class="cont">{sfx(950, 112, "...", 60, VOLT, 6, 0, "end")}</g>
+<g class="cont fb"><g class="jit">{sfx(950, 112, "...", 60, VOLT, 6, 0, "end")}</g></g>
 <text x="{W - 40}" y="150" text-anchor="end" class="lb" font-size="14" fill="{INK_MUTED}">Thanks for reading · {HANDLE}</text>
 """)
     defs = (
@@ -1155,7 +1154,6 @@ def main():
         "about.svg": about(),
         "tech-arsenal.svg": tech(),
         "freelance-services.svg": services(),
-        "training-header.svg": training_header(),
         "contact-card.svg": contact(),
         "divider.svg": divider(),
         "footer.svg": footer(),

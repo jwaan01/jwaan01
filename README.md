@@ -34,13 +34,6 @@
 
 <img src="./assets/divider.svg" width="100%" />
 
-<p align="center">
-  <img src="./assets/training-header.svg" alt="Chapter 04 — Training arc" width="100%" />
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jwaan01/jwaan01/output/github-contribution-grid-snake-dark.svg" />
-    <img alt="Contribution graph eaten by a snake" src="https://raw.githubusercontent.com/jwaan01/jwaan01/output/github-contribution-grid-snake.svg" width="100%" />
-  </picture>
-</p>
 
 <img src="./assets/divider.svg" width="100%" />
 
