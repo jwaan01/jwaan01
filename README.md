@@ -34,9 +34,6 @@
 
 <img src="./assets/divider.svg" width="100%" />
 
-
-<img src="./assets/divider.svg" width="100%" />
-
 <p align="center">
   <img src="./assets/contact-card.svg" alt="Final chapter — Contact: GitHub github.com/jwaan01, Email aovkiz123@gmail.com, LinkedIn Quan Huynh" width="100%" />
 </p>
