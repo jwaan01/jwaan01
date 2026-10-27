@@ -78,6 +78,7 @@ FONTS = {
     "lb": ("HTLabel", "BarlowCondensed-ExtraBold.woff2", 800, "normal"),
     "bd": ("HTBody", "BeVietnamPro-Regular.woff2", 400, "normal"),
     "bd6": ("HTBodySemi", "BeVietnamPro-SemiBold.woff2", 600, "normal"),
+    "dp": ("VDDisplay", "Anton-Regular.woff2", 400, "normal"),  # Vết Đỏ display
 }
 FALLBACK = {
     "sfx": "'Arial Black', Impact, sans-serif",
@@ -85,6 +86,7 @@ FALLBACK = {
     "lb": "'Arial Narrow', Arial, sans-serif",
     "bd": "'Segoe UI', Arial, sans-serif",
     "bd6": "'Segoe UI', Arial, sans-serif",
+    "dp": "Impact, 'Arial Narrow', sans-serif",
 }
 REDUCED = "@media (prefers-reduced-motion: reduce){*{animation-duration:0s!important;animation-delay:0s!important;animation-iteration-count:1!important}}"
 POP = "cubic-bezier(.2,1.6,.4,1)"
@@ -248,6 +250,7 @@ BASE_CSS = f"""
 .lb{{font-family:HTLabel,{FALLBACK['lb']};font-weight:800;text-transform:uppercase;letter-spacing:2px}}
 .bd{{font-family:HTBody,{FALLBACK['bd']};font-weight:400}}
 .bd6{{font-family:HTBodySemi,{FALLBACK['bd6']};font-weight:600}}
+.dp{{font-family:VDDisplay,{FALLBACK['dp']};font-weight:400}}
 .fb{{transform-box:fill-box;transform-origin:center}}
 .spd{{animation:spd linear infinite}}
 @keyframes spd{{from{{transform:translateX(160px);opacity:0}}20%{{opacity:1}}to{{transform:translateX(-220px);opacity:0}}}}
@@ -313,7 +316,7 @@ def _tag_ink(m):
 
 
 def svg(w, h, label, body, css, defs=""):
-    body = re.sub(r'<text ([^>]*class="(sfx|hd|lb|bd6|bd)\b[^"]*"[^>]*)>([^<]*)</text>', _tag_ink, body)
+    body = re.sub(r'<text ([^>]*class="(sfx|hd|lb|bd6|bd|dp)\b[^"]*"[^>]*)>([^<]*)</text>', _tag_ink, body)
     return (
         f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" fill="none" '
         f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{e(label)}">\n'
@@ -818,10 +821,337 @@ def footer():
     return svg(W, H, "To be continued", body, css, defs)
 
 
+# ----------------------------------------------------------------------------
+# INTERLUDE — NIGHT RUN (self-playing endless runner)
+# Vết Đỏ night palette (ink / red / white, cyan as a <5% signal) drawn with
+# Hỏa Tuyến effects (SFX lettering, speed lines, bursts).
+# ----------------------------------------------------------------------------
+VD_RED, VD_RED_DEEP = "#e8112d", "#a80a1f"
+VD_INK, VD_INK2, VD_INK3 = "#0b0b0d", "#1d1d22", "#2a2a30"
+VD_ASH, VD_MUTE, VD_CYAN = "#8a8a93", "#b9b9c2", "#00d2e0"
+
+RUN_EVENTS = [            # (kind, time the obstacle reaches the runner, label)
+    ("wall", 2.9, ["DEADLINE"]),
+    ("bug", 4.5, None),
+    ("coins", 5.9, None),
+    ("wall", 7.4, ["MERGE", "CONFLICT"]),
+    ("bug", 9.0, None),
+    ("coins", 10.3, None),
+]
+
+
+def game():
+    W, H = 1000, 340
+    GY, RX = 272, 300          # ground line, runner x (clear of the HUD title)
+    T, V = 12.0, 360.0         # loop length (s), world speed (px/s)
+    X0, X1 = W + 70, -90       # where movers enter / leave
+    pc = lambda t: f"{(t % T) / T * 100:.3f}%"
+    rnd = random.Random(42)
+    css, defs = [], []
+
+    # ---------- parallax city (tiles of exactly W px, drawn twice) ----------
+    def skyline(seed, hmin, hmax, fill, windows):
+        r = random.Random(seed)
+        out, x = [], 0
+        while x < W:
+            w = r.randint(46, 110)
+            w = min(w, W - x) if W - x < 60 else w
+            h = r.randint(hmin, hmax)
+            out.append(f'<rect x="{x}" y="{GY - h}" width="{w}" height="{h}" fill="{fill}"/>')
+            if r.random() < .35:
+                out.append(f'<rect x="{x + w // 2 - 2}" y="{GY - h - 18}" width="3" height="18" fill="{fill}"/>')
+            if windows:
+                out.append(f'<rect x="{x}" y="{GY - h}" width="{w}" height="3" fill="{WHITE}" opacity=".35"/>')
+                for wy in range(GY - h + 14, GY - 10, 16):
+                    for wx in range(x + 8, x + w - 10, 14):
+                        q = r.random()
+                        if q < .16:
+                            c = VD_CYAN if q < .02 else VD_RED
+                            out.append(f'<rect x="{wx}" y="{wy}" width="6" height="8" fill="{c}" opacity=".85"/>')
+            x += w + (r.randint(4, 18) if windows else 0)
+        g = "".join(out)
+        return g + f'<g transform="translate({W} 0)">{g}</g>'
+
+    def layer(content, dur, cls):
+        css.append(f".{cls}{{animation:{cls} {dur:.2f}s linear infinite}}"
+                   f"@keyframes {cls}{{to{{transform:translateX(-{W}px)}}}}")
+        return f'<g class="{cls}">{content}</g>'
+
+    far = layer(skyline(3, 90, 190, "#15151a", False), W / (V * .18), "lyf")
+    mid = layer(skyline(8, 50, 130, VD_INK2, True), W / (V * .45), "lym")
+
+    # ---------- ground ----------
+    css.append(f".gnd{{animation:gnd {40 / V:.3f}s linear infinite}}@keyframes gnd{{to{{transform:translateX(-40px)}}}}"
+               f".mrk{{animation:mrk {160 / V:.3f}s linear infinite}}@keyframes mrk{{to{{transform:translateX(-160px)}}}}")
+    defs.append(f'<pattern id="stripe" width="40" height="40" patternUnits="userSpaceOnUse">'
+                f'<path d="M-10 40 L18 0 M10 40 L38 0 M30 40 L58 0" stroke="{VD_INK2}" stroke-width="6"/></pattern>')
+    marks = "".join(f'<rect x="{x}" y="{GY + 10}" width="44" height="4" fill="{WHITE}" opacity=".5"/>' for x in range(0, W + 200, 160))
+    ground = (f'<rect x="0" y="{GY}" width="{W}" height="{H - GY}" fill="{VD_INK}"/>'
+              f'<g class="gnd"><rect x="0" y="{GY + 4}" width="{W + 40}" height="{H - GY}" fill="url(#stripe)"/></g>'
+              f'<g class="mrk">{marks}</g>'
+              f'<rect x="0" y="{GY - 2}" width="{W}" height="4" fill="{WHITE}"/>')
+
+    # ---------- movers (obstacles / enemies / coins) ----------
+    movers, run_kf, flip_kf, slash_kf, pops = [], [], [], [], []
+    shake_kf, flash_kf = [], []
+    jumps, slashes, grabs = [], [], []
+
+    def mover(mid_, t_hit, hit_dx, inner, vanish=False):
+        xh = RX + hit_dx
+        te = t_hit - (X0 - xh) / V
+        travel = (X0 - X1) / V
+        p_end = travel / T * 100
+        kf = (f"@keyframes mv{mid_}{{0%{{transform:translateX({X0}px)}}{p_end:.3f}%,100%{{transform:translateX({X1}px)}}}}")
+        anim = f"mv{mid_} {T}s linear {te - T:.3f}s infinite"
+        if vanish:
+            p_hit = (t_hit - te) / T * 100
+            kf += (f"@keyframes vs{mid_}{{0%,{p_hit:.3f}%{{opacity:1}}{p_hit + .01:.3f}%,100%{{opacity:0}}}}")
+            anim += f",vs{mid_} {T}s linear {te - T:.3f}s infinite"
+        css.append(kf)
+        movers.append(f'<g style="animation:{anim}">{inner}</g>')
+
+    for n, (kind, t, label) in enumerate(RUN_EVENTS):
+        if kind == "wall":
+            tall = len(label) > 1
+            w, h = 84, 74 if tall else 62
+            size = min(fit("dp", l, w - 18, 24) for l in label)
+            lines = "".join(
+                f'<text x="0" y="{-h + 26 + k * 26 if tall else -h / 2 + 10:.0f}" text-anchor="middle" class="dp" font-size="{size}" '
+                f'fill="{VD_INK}" data-alt="wall{n}" data-skip="1">{e(l)}</text>' for k, l in enumerate(label))
+            inner = (f'<g transform="rotate(-4 0 {-h / 2})">'
+                     f'<rect x="{-w / 2 + 7}" y="{-h + 7}" width="{w}" height="{h}" fill="{VD_RED}"/>'
+                     f'<rect x="{-w / 2}" y="{-h}" width="{w}" height="{h}" fill="{WHITE}" stroke="{VD_INK}" stroke-width="3"/>{lines}</g>'
+                     f'<rect x="-30" y="-6" width="60" height="6" fill="{VD_INK3}"/>')
+            mover(n, t, 0, f'<g transform="translate(0 {GY})">{inner}</g>')
+            jumps.append((t, tall))
+        elif kind == "bug":
+            body = (f'<g class="hov">'
+                    f'<polygon points="-30,0 -14,-20 14,-20 30,0 14,20 -14,20" fill="{VD_RED}" stroke="{WHITE}" stroke-width="3"/>'
+                    f'<rect x="-22" y="-30" width="16" height="4" fill="{WHITE}" class="rot"/><rect x="6" y="-30" width="16" height="4" fill="{WHITE}" class="rot"/>'
+                    f'<rect x="-14" y="-6" width="28" height="9" fill="{VD_INK}"/><rect x="2" y="-4" width="8" height="5" fill="{VD_CYAN}" class="blink"/>'
+                    f'<text x="0" y="17" text-anchor="middle" class="dp" font-size="11" fill="{WHITE}" data-skip="1" data-alt="bug">BUG</text></g>')
+            mover(n, t, 62, f'<g transform="translate(0 {GY - 64})">{body}</g>', vanish=True)
+            slashes.append(t)
+        else:
+            for k in range(3):
+                d = (f'<g transform="translate(0 {GY - 40})"><g class="spinc">'
+                     f'<polygon points="0,-11 9,0 0,11 -9,0" fill="{VD_CYAN}" stroke="{WHITE}" stroke-width="2"/></g></g>')
+                mover(f"{n}_{k}", t + k * .13, 12, d, vanish=True)
+                grabs.append(t + k * .13)
+
+    # ---------- runner timeline ----------
+    JH = 100
+    for t, tall in jumps:
+        t0, t1 = t - .34, t + .34
+        run_kf += [(t0, "translateY(0)", "cubic-bezier(.2,.7,.4,1)"),
+                   (t, f"translateY(-{JH + (10 if tall else 0)}px)", "cubic-bezier(.6,0,.8,.3)"),
+                   (t1, "translateY(0)", "linear")]
+        if tall:
+            flip_kf += [(t0 + .02, "rotate(0deg)", "cubic-bezier(.3,0,.7,1)"), (t1 - .04, "rotate(360deg)", "steps(1)"),
+                        (t1 - .03, "rotate(0deg)", "linear")]
+        pops.append(("dodge", t))
+    for t in slashes:
+        ts = t - .06
+        slash_kf += [(ts - .1, "rotate(0deg)", "cubic-bezier(.7,0,.3,1)"), (ts + .02, "rotate(225deg)", "linear"),
+                     (ts + .22, "rotate(225deg)", "ease-in-out"), (ts + .45, "rotate(0deg)", "linear")]
+        shake_kf += [(t - .01, "translate(0,0)"), (t, "translate(-6px,3px)"), (t + .05, "translate(5px,-3px)"), (t + .1, "translate(-3px,2px)"), (t + .16, "translate(0,0)")]
+        flash_kf += [(t - .01, "0"), (t, ".22"), (t + .14, "0")]
+        pops.append(("slash", t))
+    for t in grabs:
+        pops.append(("grab", t))
+
+    def kf_block(name, frames, prop="transform", rest="none", eps=.02):
+        frames = sorted(frames)
+        out = [f"0%{{{prop}:{rest}}}"]
+        for item in frames:
+            t, v = item[0], item[1]
+            tf = f";animation-timing-function:{item[2]}" if len(item) > 2 else ""
+            out.append(f"{pc(t)}{{{prop}:{v}{tf}}}")
+        out.append(f"100%{{{prop}:{rest}}}")
+        return f"@keyframes {name}{{{''.join(out)}}}"
+
+    css.append(kf_block("jump", run_kf, rest="translateY(0)"))
+    css.append(kf_block("flip", flip_kf, rest="rotate(0deg)"))
+    css.append(kf_block("slash", slash_kf, rest="rotate(0deg)"))
+    css.append(kf_block("shk", [(a, b) for a, b in shake_kf]))
+    css.append(kf_block("rfl", flash_kf, prop="opacity", rest="0"))
+    css.append(f".jmp{{animation:jump {T}s infinite}}.flp{{transform-origin:0px -44px;animation:flip {T}s infinite}}"
+               f".sla{{transform-origin:7px -60px;animation:slash {T}s infinite}}.wrld{{animation:shk {T}s infinite}}"
+               f".rfl{{opacity:0;animation:rfl {T}s infinite}}")
+
+    # ---------- the runner (geometric ninja silhouette, white outline) ----------
+    css.append(".lgA{transform-origin:0px -34px;animation:leg .38s ease-in-out infinite alternate}"
+               ".lgB{transform-origin:0px -34px;animation:leg .38s ease-in-out -.38s infinite alternate}"
+               "@keyframes leg{from{transform:rotate(-38deg)}to{transform:rotate(34deg)}}"
+               ".bob{animation:bob2 .19s ease-in-out infinite alternate}@keyframes bob2{to{transform:translateY(-3px)}}"
+               ".hov{animation:hov .6s ease-in-out infinite alternate}@keyframes hov{to{transform:translateY(-6px)}}"
+               ".rot{animation:blink .12s steps(1) infinite}"
+               ".spinc{animation:spc .8s linear infinite}@keyframes spc{50%{transform:scaleX(.25)}}")
+
+    def body(col, outline=True):
+        o = WHITE if outline else col
+        ow = 4 if outline else 0
+        leg = f'<polyline points="0,-34 5,-17 -2,0 6,0" fill="none" stroke-linecap="square" stroke-linejoin="miter"'
+        legs = (f'<g class="lgA">{leg} stroke="{o}" stroke-width="{9 + ow}"/>{leg} stroke="{col}" stroke-width="9"/></g>'
+                f'<g class="lgB">{leg} stroke="{o}" stroke-width="{9 + ow}"/>{leg} stroke="{col}" stroke-width="9"/></g>')
+        torso = f'<polygon points="-9,-35 10,-35 18,-64 -1,-71" fill="{col}" stroke="{o}" stroke-width="{ow}" stroke-linejoin="miter"/>'
+        head = (f'<path d="M1 -76 C1 -90 21 -93 23 -79 C24 -70 16 -67 9 -68 L2 -70 Z" fill="{col}" stroke="{o}" stroke-width="{ow}" stroke-linejoin="round"/>'
+                + (f'<polygon points="12,-81 23,-80 22,-76 12,-77" fill="{WHITE}"/>' if outline else ""))
+        band = (f'<polygon points="-12,-60 -4,-66 6,-40 -2,-36" fill="{VD_INK2}" stroke="{WHITE}" stroke-width="2"/>' if outline else "")
+        arm = (f'<g class="sla"><line x1="7" y1="-60" x2="20" y2="-48" stroke="{o}" stroke-width="{7 + ow}" stroke-linecap="square"/>'
+               f'<line x1="7" y1="-60" x2="20" y2="-48" stroke="{col}" stroke-width="7"/>'
+               + (f'<line x1="20" y1="-48" x2="-26" y2="-30" stroke="{WHITE}" stroke-width="3.5"/>'
+                  f'<line x1="20" y1="-48" x2="12" y2="-45" stroke="{VD_RED}" stroke-width="5"/>' if outline else "")
+               + "</g>")
+        return f'<g class="bob">{band}{legs}{torso}{head}{arm}</g>'
+
+    scarf = (f'<path fill="{VD_RED}" stroke="{VD_INK}" stroke-width="1.5" d="M3 -70 C-14 -74 -28 -66 -50 -72 L-46 -62 C-28 -58 -14 -64 4 -63 Z">'
+             f'<animate attributeName="d" dur=".42s" repeatCount="indefinite" values="'
+             f'M3 -70 C-14 -74 -28 -66 -50 -72 L-46 -62 C-28 -58 -14 -64 4 -63 Z;'
+             f'M3 -70 C-14 -68 -30 -78 -52 -66 L-46 -58 C-28 -68 -14 -60 4 -63 Z;'
+             f'M3 -70 C-14 -74 -28 -66 -50 -72 L-46 -62 C-28 -58 -14 -64 4 -63 Z"/></path>')
+    crescent_pts = []
+    for k in range(0, 21):
+        a = math.radians(-120 + k * 7.5)
+        crescent_pts.append((7 + 62 * math.cos(a), -60 + 62 * math.sin(a)))
+    for k in range(20, -1, -1):
+        a = math.radians(-112 + k * 6.6)
+        crescent_pts.append((7 + 46 * math.cos(a) + 6, -60 + 46 * math.sin(a)))
+    arc_kf = []
+    for t in slashes:
+        arc_kf += [(t - .09, "0"), (t - .07, "1"), (t + .12, "0")]
+    css.append(kf_block("arc", arc_kf, prop="opacity", rest="0") + f".arc{{opacity:0;animation:arc {T}s infinite}}")
+    runner = (
+        f'<g transform="translate({RX} {GY}) scale(1.15)"><g class="jmp"><g class="flp">'
+        f'<g opacity=".18" transform="translate(-30 0)">{body(VD_RED, False)}</g>'
+        f'<g opacity=".38" transform="translate(-15 0)">{body(VD_RED, False)}</g>'
+        f'{scarf}<g class="runner-body">{body(VD_INK)}</g>'
+        f'<polygon class="arc" points="{pts(*crescent_pts)}" fill="{WHITE}" stroke="{VD_RED}" stroke-width="2"/>'
+        f'</g></g></g>'
+    )
+
+    rd = random.Random(9)
+    dust = "".join(
+        f'<rect x="{RX - 8 + rd.uniform(-4, 4):.0f}" y="{GY - 5 - rd.uniform(0, 6):.0f}" width="{rd.choice([3, 4, 5])}" height="3" fill="{WHITE}" class="dst" '
+        f'style="animation-delay:-{k * .09:.2f}s"/>' for k in range(6))
+    css.append(".dst{animation:dst .54s linear infinite}@keyframes dst{from{transform:translateX(0);opacity:.8}to{transform:translateX(-60px) translateY(-8px);opacity:0}}")
+    land_kf = []
+    for t, tall in jumps:
+        t1 = t + .34
+        land_kf += [(t1 - .01, "0"), (t1, "1"), (t1 + .3, "0")]
+    css.append(kf_block("land", land_kf, prop="opacity", rest="0") + f".lnd{{opacity:0;animation:land {T}s infinite}}")
+    puff = "".join(f'<polygon points="{pts(*para(RX + dx, GY - 10, 22, 8, 4))}" fill="{WHITE}"/>' for dx in (-46, -20, 18))
+    effects = f'<g>{dust}</g><g class="lnd">{puff}</g>'
+    spark_kf = []
+    for t in grabs:
+        spark_kf += [(t - .01, "0"), (t, "1"), (t + .12, "0")]
+    css.append(kf_block("spk", spark_kf, prop="opacity", rest="0") + f".spk{{opacity:0;animation:spk {T}s infinite}}")
+    spark = "".join(
+        f'<line x1="{RX + 12 + 10 * math.cos(math.radians(a)):.1f}" y1="{GY - 40 + 10 * math.sin(math.radians(a)):.1f}" '
+        f'x2="{RX + 12 + 22 * math.cos(math.radians(a)):.1f}" y2="{GY - 40 + 22 * math.sin(math.radians(a)):.1f}" stroke="{VD_CYAN}" stroke-width="3"/>'
+        for a in range(0, 360, 45))
+    effects += f'<g class="spk">{spark}</g>'
+
+    # ---------- popups (SFX, score) ----------
+    pop_svg = []
+    slash_x, slash_y = RX + 190, 134
+    for kind, t in pops:
+        a, b = t - .02, t + .75
+        name = f"p{len(pop_svg)}"
+        css.append(f"@keyframes {name}{{0%,{pc(a)}{{opacity:0;transform:translateY(8px) scale(1.4)}}"
+                   f"{pc(a + .08)}{{opacity:1;transform:none}}{pc(b - .2)}{{opacity:1;transform:translateY(-14px)}}"
+                   f"{pc(b)},100%{{opacity:0;transform:translateY(-20px)}}}}")
+        st = f'class="fb" style="opacity:0;animation:{name} {T}s infinite"'
+        if kind == "slash":
+            pop_svg.append(f'<g {st}>{sfx(slash_x, slash_y, "SLASH!!", 40, WHITE, 4, -6, "middle", alt="slash")}</g>')
+            pop_svg.append(f'<g {st}><text x="{RX + 112}" y="{GY - 40}" class="dp" font-size="30" fill="{VD_CYAN}" data-alt="p100">+100</text></g>')
+            pop_svg.append(f'<g {st}>{burst(RX + 62, GY - 64, 46, 28, 10, VD_RED, 5)}</g>')
+        elif kind == "dodge":
+            pop_svg.append(f'<g {st}><g transform="rotate(-4 {RX + 150} 186)">'
+                           f'<rect x="{RX + 106}" y="{171}" width="96" height="28" fill="{VD_RED}"/>'
+                           f'<rect x="{RX + 100}" y="{165}" width="96" height="28" fill="{WHITE}"/>'
+                           f'<text x="{RX + 148}" y="187" text-anchor="middle" class="hd" font-size="20" fill="{VD_INK}" data-alt="dodge">Dodge!</text></g></g>')
+        else:
+            pop_svg.append(f'<g {st}><text x="{RX + 50}" y="{GY - 94}" class="dp" font-size="20" fill="{VD_CYAN}" data-alt="p10">+10</text></g>')
+
+    # ---------- HUD ----------
+    title = "NIGHT RUN"
+    tw = text_width("dp", title, 30) + 34
+    hud_title = (f'<g transform="rotate(-4 40 40)">'
+                 f'<rect x="{38 + 7}" y="{24 + 7}" width="{tw}" height="44" fill="{VD_RED}"/>'
+                 f'<rect x="38" y="24" width="{tw}" height="44" fill="{WHITE}"/>'
+                 f'<text x="{38 + tw / 2:.0f}" y="58" text-anchor="middle" class="dp" font-size="30" fill="{VD_INK}" data-box="38 18 {38 + tw:.0f} 80">{title}</text></g>'
+                 f'<text x="44" y="100" class="hd" font-size="15" letter-spacing="1.5" fill="{VD_MUTE}">Auto-play · Interlude</text>')
+    # odometer: N(t) = N0 + t/STEP, each column a rolling strip
+    STEP, N0, DIG, CW, DH = .12, 12480, 6, 22, 40
+    ox = W - 52 - DIG * CW
+    off = N0 * STEP
+    cols = []
+    for k in range(DIG):
+        dur = STEP * 10 ** (k + 1)
+        delay = -(off % dur)
+        x = ox + (DIG - 1 - k) * CW + CW / 2
+        strip = "".join(f'<text x="{x:.0f}" y="{62 + i * DH}" text-anchor="middle" class="dp" font-size="32" fill="{WHITE}" data-skip="1">{i % 10}</text>' for i in range(11))
+        css.append(f".od{k}{{animation:odo {dur:.2f}s steps(10) {delay:.2f}s infinite}}")
+        cols.append(f'<g clip-path="url(#odw)"><g class="od{k}">{strip}</g></g>')
+    css.append(f"@keyframes odo{{to{{transform:translateY(-{10 * DH}px)}}}}")
+    defs.append(f'<clipPath id="odw"><rect x="{ox}" y="28" width="{DIG * CW}" height="42"/></clipPath>')
+    hud_dist = (f'<polygon points="{pts(*para(ox - 22, 24, DIG * CW + 64, 50, 12))}" fill="{VD_INK2}" stroke="{WHITE}" stroke-width="3"/>'
+                f'{"".join(cols)}'
+                f'<text x="{ox + DIG * CW + 6}" y="62" class="dp" font-size="18" fill="{VD_RED}">M</text>'
+                f'<text x="{ox + DIG * CW + 34}" y="92" text-anchor="end" class="hd" font-size="15" letter-spacing="1.5" fill="{VD_MUTE}">Distance</text>')
+    # HP (8 segments) and SP (fills over the loop)
+    segs = "".join(f'<polygon points="{pts(*para(88 + i * 22, 300, 18, 16, 5))}" fill="{VD_RED}" stroke="{WHITE}" stroke-width="2"/>' for i in range(8))
+    css.append(f".spf{{transform-box:fill-box;transform-origin:left;animation:spf {T / 2}s linear infinite}}"
+               f"@keyframes spf{{from{{transform:scaleX(.05)}}90%{{transform:scaleX(1)}}to{{transform:scaleX(1)}}}}"
+               f".spm{{animation:spm {T / 2}s steps(1) infinite}}@keyframes spm{{0%{{opacity:0}}90%{{opacity:1}}}}")
+    sp_x = W - 300
+    hud_bot = (f'<polygon points="{pts(*para(30, 290, 268, 36, 10))}" fill="{VD_INK2}"/>'
+               f'<text x="48" y="315" class="hd" font-size="20" fill="{WHITE}">HP</text>{segs}'
+               f'<polygon points="{pts(*para(sp_x, 290, 268, 36, 10))}" fill="{VD_INK2}"/>'
+               f'<text x="{sp_x + 18}" y="315" class="hd" font-size="20" fill="{VD_CYAN}">SP</text>'
+               f'<polygon points="{pts(*para(sp_x + 54, 300, 160, 16, 5))}" fill="{VD_INK}" stroke="{WHITE}" stroke-width="2"/>'
+               f'<polygon class="spf" points="{pts(*para(sp_x + 56, 302, 156, 12, 4))}" fill="{VD_CYAN}"/>'
+               f'<text x="{sp_x + 222}" y="315" class="hd spm" font-size="18" fill="{VD_CYAN}">MAX</text>')
+
+    # ---------- backdrop: red slash slab, moon, halftone ----------
+    defs.append(f'<pattern id="half" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="4.9" fill="{VD_RED}"/></pattern>'
+                f'<linearGradient id="hf" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient>'
+                f'<mask id="hm"><rect x="300" y="0" width="300" height="{GY}" fill="url(#hf)"/></mask>'
+                f'<clipPath id="gframe"><rect width="{W}" height="{H}"/></clipPath>')
+    css.append(".moon{animation:moon 4s ease-in-out infinite alternate}@keyframes moon{to{transform:translateY(-6px)}}")
+    backdrop = (f'<rect width="{W}" height="{H}" fill="{VD_INK}"/>'
+                f'<rect x="300" y="0" width="300" height="{GY}" fill="url(#half)" mask="url(#hm)" opacity=".35"/>'
+                f'<polygon points="{pts((600, 0), (850, 0), (720, GY), (470, GY))}" fill="{VD_RED}"/>'
+                f'<polygon points="{pts((862, 0), (890, 0), (760, GY), (732, GY))}" fill="{VD_RED_DEEP}"/>'
+                f'<g class="moon"><circle cx="{709}" cy="{106}" r="44" fill="{VD_INK}"/><circle cx="700" cy="97" r="44" fill="{WHITE}"/></g>')
+
+    body_svg = f"""
+<g clip-path="url(#gframe)">
+  {backdrop}
+  <g class="wrld">
+    {far}{mid}
+    <g opacity=".14">{speed_lines(0, 120, W, 120, 16, WHITE, 61)}</g>
+    {ground}
+    {''.join(movers)}
+    {effects}
+    {runner}
+    {''.join(pop_svg)}
+  </g>
+  <rect class="rfl" width="{W}" height="{H}" fill="{VD_RED}"/>
+  {hud_title}{hud_dist}{hud_bot}
+  <rect x="2.5" y="2.5" width="{W - 5}" height="{H - 5}" stroke="{WHITE}" stroke-width="5"/>
+</g>
+"""
+    return svg(W, H, "Night Run: a self-playing endless runner. The ninja jumps DEADLINE and MERGE CONFLICT walls, slashes BUG drones and grabs commits.",
+               body_svg, "\n".join(css), "".join(defs))
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     files = {
         "hero.svg": hero(),
+        "night-run.svg": game(),
         "about.svg": about(),
         "tech-arsenal.svg": tech(),
         "freelance-services.svg": services(),

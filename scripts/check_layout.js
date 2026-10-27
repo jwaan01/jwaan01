@@ -19,7 +19,7 @@ const { chromium } = require('playwright');
         if (used && ![...document.fonts].some(ff => ff.family.replace(/"/g,'') === fam && ff.status === 'loaded')) out.push('FONT NOT LOADED ' + fam);
       }
       // inkRect is hoisted below
-      const T = [...document.querySelectorAll('text')].filter(t => !t.dataset.dup).map(t => {
+      const T = [...document.querySelectorAll('text')].filter(t => !t.dataset.dup && !t.dataset.skip).map(t => {
         const r = inkRect(t), pad = +(t.dataset.pad || 0);
         return { t, s: t.textContent, alt: t.dataset.alt, x0: r.x0 - pad, y0: r.y0 - pad, x1: r.x1 + pad, y1: r.y1 + pad };
       });

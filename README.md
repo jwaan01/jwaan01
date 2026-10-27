@@ -11,6 +11,12 @@
 <img src="./assets/divider.svg" width="100%" />
 
 <p align="center">
+  <img src="./assets/night-run.svg" alt="Night Run — a self-playing endless runner: a ninja jumps DEADLINE and MERGE CONFLICT walls, slashes BUG drones and grabs commits" width="100%" />
+</p>
+
+<img src="./assets/divider.svg" width="100%" />
+
+<p align="center">
   <img src="./assets/about.svg" alt="Chapter 01 — About: Quan Huynh, freelance full-stack engineer. React frontend, Node.js backend. Languages: C, C++, C#, Java, JavaScript, Python." width="100%" />
 </p>
 
