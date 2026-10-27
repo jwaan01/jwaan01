@@ -1,15 +1,37 @@
-<svg width="1000" height="24" viewBox="0 0 1000 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="divider">
+<svg width="1000" height="36" viewBox="0 0 1000 36" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="divider">
 <title>divider</title>
-<style>
-.run{animation:run 4s cubic-bezier(.6,0,.4,1) infinite}@keyframes run{from{transform:translateX(-260px)}to{transform:translateX(1000px)}}.d{animation:blink 2s ease-in-out infinite}@keyframes blink{50%{opacity:.3}}
-@media (prefers-reduced-motion: reduce){*{animation-duration:0s!important;animation-delay:0s!important}}
-</style>
+<style>@font-face{font-family:HTLabel;font-weight:800;font-style:normal;src:url(data:font/woff2;base64,d09GMgABAAAAAAPAAA4AAAAAB8QAAANuAAFocgAAAAAAAAAAAAAAAAAAAAAAAAAAGhwbghIcKgZgAHQRCAqHPIYPATYCJAMoCxYABCAFBgcgGwoGUVQttiE+FspNJ7ujCUPb8EMQUV3fR2ZVzrTWo3Wv6Ed+AL6ZJ8hdAP9Dl9O7xqKxAcMhEmiE/7ux6a23xliAGcd70gYLKI8GRnlvUxKRjcJFomkuaN/GIEACACgZeoQcAXIMRIxkOrpy9cYqeu7RfsBe9MQDfDiqdu/eby8CUOjw6H04EkZyFSHBA0JfBCFEyGVfUNbigSq68OQBsn+zB/+A7GMAZD8omqA1+6/xM2xJ8jcmU0ExHNh1+M0AwxDAkcOjKCkeGMtUFA+wVKWg5AmQAgRzdTojtimWjGassNLUJ3t52KU40NO0DtggpkoL02U2RR3mMBduUbV9eT3PkHKI+/Jc+BnSFxAANX0CCD0GBRxQwCGg8LR9Y28cnpRVbKaKOrrZiwM4JAuGz8w++uQH3/PO1770Bc8ldCNBsoxeSCJeUwBCkK0ghwEA3gWrfkV825WJo4dMTHuMnTnhmwui6DQ4Jo5PvxCOUZQnp10kduzFcQ+V/5uLTXY/MaXUcNFF1F/8qDE+vVh/4enS8E0ot5+ASXYB9qJy48XuPjnWB1T7y7WBmULdBRF8HBM8VHPRBYUqdH6SELjVc3t5IqwOvhWd9o64g3ejb8M7t2SL6KS3Rd84dUngWk+7hZ0Xv1FefHr57viLuLYxDEGb22WJcZMXJhWeflG59uJSTd4kgiphNfe04dfN3MmeNzvKbC/byQ62nUTGjjY1s5MdRHAX5w0QOIjlDxT+GY9cHY/raNSlXurtBld26GxW8zTw3ONB2CPMBiM4CxGRRXBD8fVU5hRP3Kg6vEB8EJ0bjZt1g/Nu5g3jonPyRni23vVuqs6+/nBu+XAn+8BsSGFM7579JkfJqXnbyYKbnmjdtWH745t3a+Htd23ecvS7V44pDDVbYDa039he7JysaKzalkbu6klpn3JplcL5nbhVQdXPenM2Ay/ZyWaYvVMeltqWlE7avHnKqopZSrCRTc32RuZk20n02QzDYvRZDRq990+qe//YT4P4snjsiMbRowd2bHxZ/oE/Cn4KtKjXitSmE3wb2WW/mp/Ft/Za+FuQd18C3sv/ezHgi9yqMQTZn/IFdcqjAAic8bY1IiCRL87dvxLJbcBzII8yQiNGyGeK8rWCPEVFnjVYJhDIKxIEiJiJAsCTcjgAyB40nQ4A) format('woff2')}
 
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
-  <stop stop-color="#22D3EE" stop-opacity="0"/><stop offset=".5" stop-color="#34D399"/><stop offset="1" stop-color="#A78BFA" stop-opacity="0"/>
-</linearGradient></defs>
-<line x1="0" y1="12" x2="1000" y2="12" stroke="#1E293B" stroke-width="2"/>
-<rect class="run" x="0" y="10.5" width="260" height="3" rx="1.5" fill="url(#g)"/>
-<rect class="d" x="495.0" y="7" width="10" height="10" transform="rotate(45 500.0 12)" fill="#0B1020" stroke="#34D399" stroke-width="2"/>
+.sfx{font-family:HTSfx,'Arial Black', Impact, sans-serif}
+.hd{font-family:HTHead,'Arial Narrow', Impact, sans-serif;font-weight:900;font-style:italic;text-transform:uppercase}
+.lb{font-family:HTLabel,'Arial Narrow', Arial, sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:2px}
+.bd{font-family:HTBody,'Segoe UI', Arial, sans-serif;font-weight:400}
+.bd6{font-family:HTBodySemi,'Segoe UI', Arial, sans-serif;font-weight:600}
+.fb{transform-box:fill-box;transform-origin:center}
+.spd{animation:spd linear infinite}
+@keyframes spd{from{transform:translateX(160px);opacity:0}20%{opacity:1}to{transform:translateX(-220px);opacity:0}}
+.jit{animation:jit .32s steps(1) infinite}
+@keyframes jit{0%{transform:translate(0,0)}25%{transform:translate(2px,-1px)}50%{transform:translate(-1px,2px)}75%{transform:translate(-2px,-1px)}}
+.spin{transform-box:fill-box;transform-origin:center;animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flick{animation:flick 1.6s steps(2) infinite}
+@keyframes flick{50%{opacity:.55}}
+.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:.15}}
+@keyframes pop{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:scale(1)}}
+@keyframes stamp{0%{opacity:0;transform:scale(2.2) rotate(-6deg)}60%{opacity:1;transform:scale(.94)}100%{opacity:1;transform:none}}
+@keyframes slamL{from{transform:translateX(-120%)}to{transform:none}}
+@keyframes slamR{from{transform:translateX(110%)}to{transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}}
+
+.run{animation:run 2.6s cubic-bezier(.7,0,.3,1) infinite}@keyframes run{from{transform:translateX(-200px)}to{transform:translateX(1100px)}}
+@media (prefers-reduced-motion: reduce){*{animation-duration:0s!important;animation-delay:0s!important;animation-iteration-count:1!important}}</style>
+<defs><pattern id="tone" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.3" fill="#0f0f14"/></pattern><pattern id="toneW" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.3" fill="#ffffff"/></pattern><pattern id="toneF" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r=".9" fill="#0f0f14"/></pattern><linearGradient id="fadeUp" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#fff"/><stop offset=".75" stop-color="#fff" stop-opacity="0"/></linearGradient><clipPath id="cd"><rect x="2" y="8" width="996" height="20"/></clipPath></defs>
+
+<polygon points="0.0,6.0 1000.0,6.0 1000.0,30.0 0.0,30.0" fill="#fbf8f1" stroke="#0f0f14" stroke-width="4"/>
+<g clip-path="url(#cd)"><g class="run"><polygon points="10.0,8.0 180.0,8.0 170.0,28.0 0.0,28.0" fill="#e3203b"/></g></g>
+<g transform="translate(500.0 18)"><g><polygon points="-41.0,-15.0 50.0,-15.0 41.0,15.0 -50.0,15.0" fill="#0f0f14" transform="translate(4 4)"/><polygon points="-41.0,-15.0 50.0,-15.0 41.0,15.0 -50.0,15.0" fill="#ffd60a" stroke="#0f0f14" stroke-width="4" stroke-linejoin="miter"/></g></g>
+<text x="500.0" y="24" data-box="459.0 3 541.0 33" text-anchor="middle" class="lb" font-size="16" fill="#0f0f14" data-ink="0.250 0.167">NEXT</text>
 
 </svg>

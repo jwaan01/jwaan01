@@ -22,9 +22,9 @@ jobs:
         with:
           github_user_name: jwaan01
           outputs: |
-            dist/github-contribution-grid-snake.svg
-            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
-            dist/github-contribution-grid-snake.gif
+            dist/github-contribution-grid-snake.svg?color_snake=#0f0f14&color_dots=#efeadf,#ffc7cf,#f2788a,#e3203b,#b3121f
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark&color_snake=#ffd60a&color_dots=#161b22,#5c1a24,#8f1d2e,#c41f36,#e3203b
+            dist/github-contribution-grid-snake.gif?color_snake=#0f0f14&color_dots=#efeadf,#ffc7cf,#f2788a,#e3203b,#b3121f
 
       - name: Push Snake Animation to Output Branch
         uses: crazy-max/ghaction-github-pages@v4
